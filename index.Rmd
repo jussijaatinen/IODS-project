@@ -1,8 +1,9 @@
 ---
 title: "IODS course project"
+author: "Jussi Jaatinen"
 output:
   html_document:
-    theme: cosmo
+    theme: journal
     toc: true
     toc_depth: 2
     fig_caption: true

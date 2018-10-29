@@ -1,0 +1,11 @@
+---
+title: "README"
+author: "Jussi Jaatinen"
+output: github_document
+---
+
+https://github.com/jussijaatinen/IODS-project or
+
+https://jussijaatinen.github.io/IODS-project/
+
+First exercises for Rmd-writing.

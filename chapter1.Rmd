@@ -1,4 +1,14 @@
 
-# About the project
+# About the IODS-project
 
-*Write a short description about the course and add a link to your github repository here. This is an R markdown (.Rmd) file so you can use R markdown syntax. See the 'Useful links' page in the mooc area (chapter 1) for instructions.*
+*__This course is just what I need now.__*
+
+We are writing couple of articles in **psychoacoustics** and need to use GAM and PCA analysis.
+This helps me to go deeper in R programming and bring also better understanding, what my colleague is doing in GAM (General Additive Model). Earlier MOOC courses in statistics have been interesting and useful. This is an excellent continuum.
+
+**I have a new GitHub repository dedicated to this project:**
+
+https://github.com/jussijaatinen/IODS-project 
+
+
+
