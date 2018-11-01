@@ -28,3 +28,18 @@ output:
 ```
 
 ***
+
+```{r child = "chapter4.Rmd"}
+```
+
+***
+
+```{r child = "chapter5.Rmd"}
+```
+
+***
+
+```{r child = "chapter6.Rmd"}
+```
+
+***

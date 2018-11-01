@@ -1,0 +1,81 @@
+---
+title: "Analysis of Learning 2014 Database"
+author: "Jussi Jaatinen"
+output: html_document
+---
+
+# Analysis of Learning 2014 Database
+
+1. Read the joined student alcohol consumption data into R either from your local folder (if you completed the Data Wrangling part) or from this url: 
+http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/alc.txt 
+Print out the names of the variables in the data and describe the data set briefly, assuming the reader has no previous knowledge of it. 
+
+Data Set Information:
+
+This data approach student achievement in secondary education of two Portuguese schools. The data attributes include student grades, demographic, social and school related features) and it was collected by using school reports and questionnaires. Two datasets are provided regarding the performance in two distinct subjects: Mathematics (mat) and Portuguese language (por). In [Cortez and Silva, 2008], the two datasets were modeled under binary/five-level classification and regression tasks. Important note: the target attribute G3 has a strong correlation with attributes G2 and G1. This occurs because G3 is the final year grade (issued at the 3rd period), while G1 and G2 correspond to the 1st and 2nd period grades. It is more difficult to predict G3 without G2 and G1, but such prediction is much more useful (see paper source for more details).
+
+
+Attribute Information:
+
+# Attributes for both student-mat.csv (Math course) and student-por.csv (Portuguese language course) datasets: 
+1 school - student's school (binary: 'GP' - Gabriel Pereira or 'MS' - Mousinho da Silveira) 
+2 sex - student's sex (binary: 'F' - female or 'M' - male) 
+3 age - student's age (numeric: from 15 to 22) 
+4 address - student's home address type (binary: 'U' - urban or 'R' - rural) 
+5 famsize - family size (binary: 'LE3' - less or equal to 3 or 'GT3' - greater than 3) 
+6 Pstatus - parent's cohabitation status (binary: 'T' - living together or 'A' - apart) 
+7 Medu - mother's education (numeric: 0 - none, 1 - primary education (4th grade), 2 â€“ 5th to 9th grade, 3 â€“ secondary education or 4 â€“ higher education) 
+8 Fedu - father's education (numeric: 0 - none, 1 - primary education (4th grade), 2 â€“ 5th to 9th grade, 3 â€“ secondary education or 4 â€“ higher education) 
+9 Mjob - mother's job (nominal: 'teacher', 'health' care related, civil 'services' (e.g. administrative or police), 'at_home' or 'other') 
+10 Fjob - father's job (nominal: 'teacher', 'health' care related, civil 'services' (e.g. administrative or police), 'at_home' or 'other') 
+11 reason - reason to choose this school (nominal: close to 'home', school 'reputation', 'course' preference or 'other') 
+12 guardian - student's guardian (nominal: 'mother', 'father' or 'other') 
+13 traveltime - home to school travel time (numeric: 1 - <15 min., 2 - 15 to 30 min., 3 - 30 min. to 1 hour, or 4 - >1 hour) 
+14 studytime - weekly study time (numeric: 1 - <2 hours, 2 - 2 to 5 hours, 3 - 5 to 10 hours, or 4 - >10 hours) 
+15 failures - number of past class failures (numeric: n if 1<=n<3, else 4) 
+16 schoolsup - extra educational support (binary: yes or no) 
+17 famsup - family educational support (binary: yes or no) 
+18 paid - extra paid classes within the course subject (Math or Portuguese) (binary: yes or no) 
+19 activities - extra-curricular activities (binary: yes or no) 
+20 nursery - attended nursery school (binary: yes or no) 
+21 higher - wants to take higher education (binary: yes or no) 
+22 internet - Internet access at home (binary: yes or no) 
+23 romantic - with a romantic relationship (binary: yes or no) 
+24 famrel - quality of family relationships (numeric: from 1 - very bad to 5 - excellent) 
+25 freetime - free time after school (numeric: from 1 - very low to 5 - very high) 
+26 goout - going out with friends (numeric: from 1 - very low to 5 - very high) 
+27 Dalc - workday alcohol consumption (numeric: from 1 - very low to 5 - very high) 
+28 Walc - weekend alcohol consumption (numeric: from 1 - very low to 5 - very high) 
+29 health - current health status (numeric: from 1 - very bad to 5 - very good) 
+30 absences - number of school absences (numeric: from 0 to 93) 
+
+# these grades are related with the course subject, Math or Portuguese: 
+31 G1 - first period grade (numeric: from 0 to 20) 
+31 G2 - second period grade (numeric: from 0 to 20) 
+32 G3 - final grade (numeric: from 0 to 20, output target)
+
+
+2. The purpose of your analysis is to study the relationships between high/low alcohol consumption and some of the other variables in the data. To do this, choose 4 interesting variables in the data and for each of them, present your personal hypothesis about their relationships with alcohol consumption. (0-1 point)
+
+sex, final grade, family relations, absences
+Hyphothesis: Boys consume more alcohol, more free time - easier to drink, drinking may have caused failures, better students consume less alcohol
+
+3. Numerically and graphically explore the distributions of your chosen variables and their relationships with alcohol consumption (use for example cross-tabulations, bar plots and box plots). Comment on your findings and compare the results of your exploration to your previously stated hypotheses. (0-5 points)
+
+
+
+4. Use logistic regression to statistically explore the relationship between your chosen variables and the binary high/low alcohol consumption variable as the target variable. Present and interpret a summary of the fitted model. Present and interpret the coefficients of the model as odds ratios and provide confidence intervals for them. Interpret the results and compare them to your previously stated hypothesis. Hint: If your model includes factor variables see for example the first answer of this stackexchange thread on how R treats and how you should interpret these variables in the model output (or use some other resource to study this). (0-5 points)
+
+Using the variables which, according to your logistic regression model, had a statistical relationship with high/low alcohol consumption, explore the predictive power of you model. Provide a 2x2 cross tabulation of predictions versus the actual values and optionally display a graphic visualizing both the actual values and the predictions. Compute the total proportion of inaccurately classified individuals (= the training error) and comment on all the results. Compare the performance of the model with performance achieved by some simple guessing strategy. (0-3 points)
+
+Bonus: Perform 10-fold cross-validation on your model. Does your model have better test set performance (smaller prediction error using 10-fold cross-validation) compared to the model introduced in DataCamp (which had about 0.26 error). Could you find such a model? (0-2 points to compensate any loss of points from the above exercises)
+
+Super-Bonus: Perform cross-validation to compare the performance of different logistic regression models (= different sets of predictors). Start with a very high number of predictors and explore the changes in the training and testing errors as you move to models with less predictors. Draw a graph displaying the trends of both training and testing errors by the number of predictors in the model. (0-4 points to compensate any loss of points from the above exercises)
+
+
+
+*Describe the work you have done this week and summarize your learning.*
+
+- Describe your work and results clearly. 
+- Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods
+- Assume the reader has no previous knowledge of your data or the more advanced methods you are using  

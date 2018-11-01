@@ -1,7 +1,53 @@
-# Insert chapter 2 title here
+---
+title: "Analysis of Learning 2014 Database"
+author: "Jussi Jaatinen"
+output: 
+  html_document: 
+    fig_height: 8
+    fig_width: 15
+---
 
-*Describe the work you have done this week and summarize your learning.*
+# Analysis of Learning 2014 Database
 
-- Describe your work and results clearly. 
-- Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods
-- Assume the reader has no previous knowledge of your data or the more advanced methods you are using  
+The data has been collected in query about teaching and learning after the course of "Introduction to statistics for social science"", fall 2014. The most essential parts of study (Deep, Surface and Strategic learning) have been named and combined so, that connection to the thought dimensions can be seen.
+
+Due to largest correlation with dependent variable "Points", three variables were chosen to the model. The independent variables were Attitude (R=0.44), Strategic learning (R=0.15) and Surface Learning (R=-0.14).
+
+```{r echo=FALSE, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(GGally)
+learning2014 <- read.table("~/Documents/GitHub/IODS-project/data/learning2014.txt")
+
+
+summary(learning2014)
+str(learning2014)
+
+ggpairs(learning2014, mapping = aes(col = gender, alpha = 0.3), lower = list(combo = wrap("facethist", bins = 20)))
+
+```
+
+```{r echo=FALSE, message=FALSE}
+My_model <- lm(learning2014$Points ~ learning2014$Attitude + learning2014$stra + learning2014$surf, data = learning2014)
+summary(My_model)
+
+My_model2 <- lm(learning2014$Points ~ learning2014$Attitude + learning2014$stra, data = learning2014)
+summary(My_model2)
+
+My_model3 <- lm(learning2014$Points ~ learning2014$Attitude + learning2014$surf, data = learning2014)
+summary(My_model3)
+
+My_model4 <- lm(learning2014$Points ~ learning2014$Attitude + learning2014$stra + learning2014$gender, data = learning2014)
+summary(My_model4)
+
+My_model5 <- lm(learning2014$Points ~ learning2014$Attitude, data = learning2014)
+summary(My_model5)
+```
+For testing validity of model and assumption of normal distributed samples following tests have been done: Residuals vs Fitted, Normal Q-Q and Residuals vs Leverage. As we can see in Residuals vs Fitted, residuals are reasonable equally distributed. In Normal Q-Q plot we can see that residuals follow linearity well enough. In Residual vs Leverage image there is no outliers in isolated positions far from mean. Therefore assumption of linearity and normal distribution can be accepted. 
+
+```{r echo=FALSE, message=FALSE}
+par(mfrow = c(2,2))
+a <- c(1, 2, 5)
+plot(My_model5, which = a)
+```
+
