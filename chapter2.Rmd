@@ -71,7 +71,7 @@ As seen above, only _Attitude_ was statistically significant of chosen variables
 If comparing R squared (R^2^) values between models, it can be seen that Attitude variable alone explains almost as large amount of variance as if combined with other two of tested variable.
 
 ***
-# Validity of model
+## Validity of model
 
 For testing validity of model and assumption of normal distributed samples following tests have been done: Residuals vs Fitted, Normal Q-Q and Residuals vs Leverage. As we can see in Residuals vs Fitted, residuals are reasonable normally distributed. In Normal Q-Q plot we can see that residuals follow linearity well enough (except far ends). In Residual vs Leverage image there are no outliers in isolated positions far from mean. Therefore assumption of linearity and normal distribution can be accepted. 
 
