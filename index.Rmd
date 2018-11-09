@@ -7,8 +7,8 @@ output:
     toc: true
     toc_depth: 2
     fig_caption: true
-    fig_width: 6
-    fig_height: 4
+    fig_width: 15
+    fig_height: 8
     code_folding: hide
 ---
 
