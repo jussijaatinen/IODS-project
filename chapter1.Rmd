@@ -4,7 +4,7 @@
 *__This course is just what I need now.__*
 
 We are writing couple of articles in **psychoacoustics** and need to use GAM and PCA analysis.
-This helps me to go deeper in R programming and bring also better understanding, what my colleague is doing in GAM (General Additive Model). Earlier MOOC courses in statistics have been interesting and useful. This is an excellent continuum.
+This helps me to go deeper in R programming and brings also better understanding, what my colleague is doing in GAM (General Additive Model). Earlier MOOC courses in statistics have been interesting and useful. This is an excellent continuum.
 
 **I have a new GitHub repository dedicated to this project:**
 

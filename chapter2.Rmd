@@ -8,24 +8,43 @@ output:
 ---
 
 # Analysis of Learning 2014 Database
+*** 
 
-The data has been collected in query about teaching and learning after the course of "Introduction to statistics for social science"", fall 2014. The most essential parts of study (Deep, Surface and Strategic learning) have been named and combined so, that connection to the thought dimensions can be seen.
+###### The data has been collected in query about teaching and learning after the course of "Introduction to statistics for social science"", fall 2014. The most essential parts of study (Deep, Surface and Strategic learning) have been named and combined so, that connection to the thought dimensions can be seen.
 
-Due to largest correlation with dependent variable "Points", three variables were chosen to the model. The independent variables were Attitude (R=0.44), Strategic learning (R=0.15) and Surface Learning (R=-0.14).
+***
 
 ```{r echo=FALSE, message=FALSE}
 library(dplyr)
 library(ggplot2)
 library(GGally)
 learning2014 <- read.table("~/Documents/GitHub/IODS-project/data/learning2014.txt")
+```
+##### Summary of dataset. 
 
+###### There were twice as much females than men in answer group. Dataset has 166 observations and 7 variables.
 
+```{r echo=FALSE, message=FALSE}
 summary(learning2014)
-str(learning2014)
+```
 
+```{r echo=FALSE, message=FALSE}
+str(learning2014)
+```
+
+***
+##### Correlations between variables. 
+
+###### Due to largest correlation with dependent variable "Points", three variables were chosen to the model. The independent variables were _Attitude_ (R=0.44), _Strategic learning_ (R=0.15) and _Surface Learning_ (R=-0.14). Genders were combined in correlation test.
+
+```{r echo=FALSE, message=FALSE}
 ggpairs(learning2014, mapping = aes(col = gender, alpha = 0.3), lower = list(combo = wrap("facethist", bins = 20)))
 
 ```
+ 
+*** 
+##### For testing, which contributions of chosen independent variables were significant, several possible alternatives were evaluated for the best regression model.
+
 
 ```{r echo=FALSE, message=FALSE}
 My_model <- lm(learning2014$Points ~ learning2014$Attitude + learning2014$stra + learning2014$surf, data = learning2014)
@@ -43,11 +62,19 @@ summary(My_model4)
 My_model5 <- lm(learning2014$Points ~ learning2014$Attitude, data = learning2014)
 summary(My_model5)
 ```
-For testing validity of model and assumption of normal distributed samples following tests have been done: Residuals vs Fitted, Normal Q-Q and Residuals vs Leverage. As we can see in Residuals vs Fitted, residuals are reasonable equally distributed. In Normal Q-Q plot we can see that residuals follow linearity well enough. In Residual vs Leverage image there is no outliers in isolated positions far from mean. Therefore assumption of linearity and normal distribution can be accepted. 
+
+
+##### As seen above, only _Attitude_ was statistically significant of chosen variables.
+
+##### If comparing R squared (R^2^) values between models, it can be seen that Attitude variable alone explains almost as large amount of variance as if combined with other two of tested variable.
+
+***
+
+##### For testing validity of model and assumption of normal distributed samples following tests have been done: Residuals vs Fitted, Normal Q-Q and Residuals vs Leverage. As we can see in Residuals vs Fitted, residuals are reasonable normally distributed. In Normal Q-Q plot we can see that residuals follow linearity well enough (except far ends). In Residual vs Leverage image there are no outliers in isolated positions far from mean. Therefore assumption of linearity and normal distribution can be accepted. 
 
 ```{r echo=FALSE, message=FALSE}
 par(mfrow = c(2,2))
 a <- c(1, 2, 5)
 plot(My_model5, which = a)
 ```
-
+***
