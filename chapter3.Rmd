@@ -26,11 +26,11 @@ The data of this study has been collected from two Portugese second grade school
 Hyphotheses: 
 
 - Males consume more alcohol  
-- Better students consume less alcohol
+- It is more common to use alcohol with friends outside home
 - Good family relations decrease drinking 
 - Drinking may cause absences
 
-According to hyphotheses, the selected explanatory variables are sex, final grade, family relations and absences. According to first hyphothesis, all analyses have been divided to two groups, females and males.
+According to hyphotheses, the selected explanatory variables are sex, go out, family relations and absences. According to first hyphothesis, all analyses have been divided to two groups, females and males.
 
 In dataset there are lot of background variables like demographic, social relationships, parents´education and employment, or living area as well as grades, absences or health. Full descriptions of study is available here: https://archive.ics.uci.edu/ml/datasets/Student+Performance. For alcohol consumption related study, the original data has been modified by combining and averaging weekend and weekdays alcohol consumptions. As result two new variables have been created: alc_use (Likert, 1-5, where 1 = very low, 5 = very high) and high_use (logical, TRUE > 2). Total number of variables after adding is 35. Number of observations is 382, which 198 females, 184 males.
 
@@ -58,14 +58,14 @@ table(alc$sex, alc$high_use) %>% addmargins() %>% prop.table()
 
 ```
 
-##### Relationship between alcohol consumption and final grades
+##### Relationship between alcohol consumption and going out with friends
 
-In males high alcohol consumption influences more to grades than in females. In females the difference between groups is insignificant. 
+Having more freetime outside home with friends increases alcohol consumption in both sexes significantly.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-# initialize a plot of high_use and grades
-g1 <- ggplot(alc, aes(x = high_use, y = G3, col = sex))
-g1 + geom_boxplot() + xlab("Alcohol consumption low / high") + ylab("Grades")
+# initialize a plot of high_use and going out with friends
+g1 <- ggplot(alc, aes(x = high_use, y = goout, col = sex))
+g1 + geom_boxplot() + xlab("Alcohol consumption low / high") + ylab("Frequency of going out with friends")
 ```
 
 ##### Relationship between alcohol consumption and absences
@@ -96,11 +96,11 @@ g3 + geom_boxplot() + xlab("Alcohol consumption low / high") + ylab("Family rela
 
 ### Logistic regression 
 
-All chosen variables are statistically significant. Especially sex is most significant of all and its odd ratio was the highest (2.84). This means that propability for high alcohol consumption in males is almost three times higher than in females. None of the included variables include 1 in confidental interval, which means they all have meaningful influence to the model. 
+All chosen variables are statistically significant. Especially sex is most significant of all and its odd ratio was the highest (2.84). This means that propability for high alcohol consumption in males is almost three times higher than in females. Another strongly influencing variable is "Going out with friends" (goout). None of the included variables include 1 in confidental interval, which means they all have meaningful influence to the model. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 # Logistic regression model with chosen variables
-m <- glm(high_use ~ famrel + absences + sex + G3, data = alc, family = "binomial")
+m <- glm(high_use ~ famrel + absences + sex + goout, data = alc, family = "binomial")
 # Summary of the model
 summary(m)
 # Coefficients of the model
@@ -117,7 +117,7 @@ cbind(OR, CI)
 
 ### Predictive power of the model
 
-With chosen variables, predictive power of model (penalty) is ~ 0.25 (TRUE-FALSE + FALSE-TRUE pairs summed). This means that about 3/4 of predictions are correct (TRUE-TRUE + FALSE-FALSE pairs summed).
+With chosen variables, predictive power of model (penalty) is ~ 0.20 (TRUE-FALSE + FALSE-TRUE pairs summed). This means that about 4/5 of predictions are correct (TRUE-TRUE + FALSE-FALSE pairs summed).
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 # predict the probability of high_use
@@ -167,7 +167,7 @@ cvk$delta[1]
 
 ### 10-fold cross-validation on my model. 
 
-This model have approximately the same prediction error using 10-fold cross-validation compared to the model introduced in DataCamp (which had about 0.26 error). 
+This model have smaller prediction error (0.20) using 10-fold cross-validation compared to the model introduced in DataCamp (which had about 0.26 error). This means that chosen variables in my model predict better high alcohol consumption.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
@@ -181,32 +181,33 @@ cv10$delta[1]
 
 ### Cross-validation to compare the performance of different logistic regression models
 
-The highest amount of predictors is in my original model introduced earlier. Other models are reduced combinations (N=17) of original model. In 10-fold cross validation, the smallest penalty loss was in model with following predictors: Sex, Family relations and Absences. 
+The highest amount of predictors is in my original model introduced earlier. Other models are reduced combinations of original model or added to the model previously unused variables (N=18). In 10-fold cross validation, the smallest penalty loss (0.20) was in my original model. Changing variables increased or decreased penalty loss depending on significancy of chosen variables.
 
 ```{r echo=FALSE, message=FALSE, comment=''}
 
 # find the model with glm()
-m1 <- glm(high_use ~ famrel + absences + sex + G3, data = alc, family = "binomial")
+m1 <- glm(high_use ~ famrel + absences + sex + goout, data = alc, family = "binomial")
 m2 <- glm(high_use ~ famrel + absences + sex, data = alc, family = "binomial")
 m3 <- glm(high_use ~ famrel + absences, data = alc, family = "binomial")
 m4 <- glm(high_use ~ famrel, data = alc, family = "binomial")
-m5 <- glm(high_use ~ absences + sex + G3, data = alc, family = "binomial")
-m6 <- glm(high_use ~ famrel + absences+ G3, data = alc, family = "binomial")
+m5 <- glm(high_use ~ absences + sex + goout, data = alc, family = "binomial")
+m6 <- glm(high_use ~ famrel + absences+ goout, data = alc, family = "binomial")
 m7 <- glm(high_use ~ famrel + absences + sex, data = alc, family = "binomial")
 m8 <- glm(high_use ~ absences, data = alc, family = "binomial")
-m9 <- glm(high_use ~ absences + sex + G3, data = alc, family = "binomial")
-m10 <- glm(high_use ~ famrel + sex + G3, data = alc, family = "binomial")
+m9 <- glm(high_use ~ absences + sex + goout, data = alc, family = "binomial")
+m10 <- glm(high_use ~ famrel + sex + goout, data = alc, family = "binomial")
 m11 <- glm(high_use ~ famrel + absences + sex, data = alc, family = "binomial")
 m12 <- glm(high_use ~ sex, data = alc, family = "binomial")
 m13 <- glm(high_use ~ famrel + sex, data = alc, family = "binomial")
 m14 <- glm(high_use ~ absences + sex, data = alc, family = "binomial")
-m15 <- glm(high_use ~ sex + G3, data = alc, family = "binomial")
-m16 <- glm(high_use ~ famrel + G3, data = alc, family = "binomial")
-m17 <- glm(high_use ~ absences + G3, data = alc, family = "binomial")
-m18 <- glm(high_use ~ G3, data = alc, family = "binomial")
+m15 <- glm(high_use ~ sex + goout, data = alc, family = "binomial")
+m16 <- glm(high_use ~ famrel + goout, data = alc, family = "binomial")
+m17 <- glm(high_use ~ absences + goout, data = alc, family = "binomial")
+m18 <- glm(high_use ~ goout, data = alc, family = "binomial")
+m19 <- glm(high_use ~ famrel + absences + sex + G3 + freetime + age + failures + famsize + romantic + health + goout, data = alc, family = "binomial")
 
 
-model_vector = c("m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9", "m10", "m11", "m12", "m13", "m14", "m15", "m16", "m17", "m18")
+model_vector = c("m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9", "m10", "m11", "m12", "m13", "m14", "m15", "m16", "m17", "m18", "m19")
 # print out a summary of the model
 for (i in model_vector) {
 sum <- summary(get(i))
