@@ -13,42 +13,42 @@ The data has been collected in query about teaching and learning after the cours
 
 ***
 
-```{r echo=FALSE, message=FALSE}
+```{r echo=FALSE, message=FALSE, comment=''}
 library(dplyr)
 library(ggplot2)
 library(GGally)
 learning2014 <- read.table("~/Documents/GitHub/IODS-project/data/learning2014.txt")
 ```
-## Summary of dataset. 
+### Summary of dataset. 
 
 There were twice as much females than men in answer group. Dataset has 166 observations and 7 variables.
 
-```{r echo=FALSE, message=FALSE}
+```{r echo=FALSE, message=FALSE, comment=''}
 summary(learning2014)
 ```
 
-```{r echo=FALSE, message=FALSE}
+```{r echo=FALSE, message=FALSE, comment=''}
 str(learning2014)
 ```
 
 ***
-## Correlations between variables. 
+### Correlations between variables. 
 
 Due to largest correlation with dependent variable "Points", three variables were chosen to the model. The independent variables were _Attitude_ (R=0.44), _Strategic learning_ (R=0.15) and _Surface Learning_ (R=-0.14). Genders were combined in correlation test.
 
-```{r echo=FALSE, message=FALSE}
+```{r echo=FALSE, message=FALSE, comment=''}
 ggpairs(learning2014, mapping = aes(col = gender, alpha = 0.3), lower = list(combo = wrap("facethist", bins = 20)))
 
 ```
  
 *** 
 
-## Regression models
+### Regression models
 
 For testing, which contributions of chosen independent variables were significant, several possible alternatives were evaluated for the best regression model.
 
 
-```{r echo=FALSE, message=FALSE}
+```{r echo=FALSE, message=FALSE, comment=''}
 My_model <- lm(learning2014$Points ~ learning2014$Attitude + learning2014$stra + learning2014$surf, data = learning2014)
 summary(My_model)
 
@@ -71,11 +71,11 @@ As seen above, only _Attitude_ was statistically significant of chosen variables
 If comparing R squared (R^2^) values between models, it can be seen that Attitude variable alone explains almost as large amount of variance as if combined with other two of tested variable. Still it explains only a fraction (< 20%) of total variance of this data.
 
 ***
-## Validity of model
+### Validity of model
 
 For testing validity of model and assumption of normal distributed samples following tests have been done: Residuals vs Fitted, Normal Q-Q and Residuals vs Leverage. As we can see in Residuals vs Fitted, residuals are reasonable normally distributed. In Normal Q-Q plot we can see that residuals follow linearity well enough (except far ends). In Residual vs Leverage image there are no outliers in isolated positions far from mean. Therefore assumption of linearity and normal distribution can be accepted. 
 
-```{r echo=FALSE, message=FALSE}
+```{r echo=FALSE, message=FALSE, comment=''}
 par(mfrow = c(2,2))
 a <- c(1, 2, 5)
 plot(My_model5, which = a)

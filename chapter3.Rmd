@@ -1,81 +1,225 @@
 ---
-title: "Analysis of Learning 2014 Database"
+title: "Analysis of Alcohol consumption in two Portugese secondary schools"
 author: "Jussi Jaatinen"
 output: html_document
 ---
 
-# Analysis of Learning 2014 Database
-
-1. Read the joined student alcohol consumption data into R either from your local folder (if you completed the Data Wrangling part) or from this url: 
-http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/alc.txt 
-Print out the names of the variables in the data and describe the data set briefly, assuming the reader has no previous knowledge of it. 
-
-Data Set Information:
-
-This data approach student achievement in secondary education of two Portuguese schools. The data attributes include student grades, demographic, social and school related features) and it was collected by using school reports and questionnaires. Two datasets are provided regarding the performance in two distinct subjects: Mathematics (mat) and Portuguese language (por). In [Cortez and Silva, 2008], the two datasets were modeled under binary/five-level classification and regression tasks. Important note: the target attribute G3 has a strong correlation with attributes G2 and G1. This occurs because G3 is the final year grade (issued at the 3rd period), while G1 and G2 correspond to the 1st and 2nd period grades. It is more difficult to predict G3 without G2 and G1, but such prediction is much more useful (see paper source for more details).
+# Analysis of Alcohol consumption in two Portugese secondary schools
 
 
-Attribute Information:
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(tidyverse)
+library(boot)
 
-# Attributes for both student-mat.csv (Math course) and student-por.csv (Portuguese language course) datasets: 
-1 school - student's school (binary: 'GP' - Gabriel Pereira or 'MS' - Mousinho da Silveira) 
-2 sex - student's sex (binary: 'F' - female or 'M' - male) 
-3 age - student's age (numeric: from 15 to 22) 
-4 address - student's home address type (binary: 'U' - urban or 'R' - rural) 
-5 famsize - family size (binary: 'LE3' - less or equal to 3 or 'GT3' - greater than 3) 
-6 Pstatus - parent's cohabitation status (binary: 'T' - living together or 'A' - apart) 
-7 Medu - mother's education (numeric: 0 - none, 1 - primary education (4th grade), 2 â€“ 5th to 9th grade, 3 â€“ secondary education or 4 â€“ higher education) 
-8 Fedu - father's education (numeric: 0 - none, 1 - primary education (4th grade), 2 â€“ 5th to 9th grade, 3 â€“ secondary education or 4 â€“ higher education) 
-9 Mjob - mother's job (nominal: 'teacher', 'health' care related, civil 'services' (e.g. administrative or police), 'at_home' or 'other') 
-10 Fjob - father's job (nominal: 'teacher', 'health' care related, civil 'services' (e.g. administrative or police), 'at_home' or 'other') 
-11 reason - reason to choose this school (nominal: close to 'home', school 'reputation', 'course' preference or 'other') 
-12 guardian - student's guardian (nominal: 'mother', 'father' or 'other') 
-13 traveltime - home to school travel time (numeric: 1 - <15 min., 2 - 15 to 30 min., 3 - 30 min. to 1 hour, or 4 - >1 hour) 
-14 studytime - weekly study time (numeric: 1 - <2 hours, 2 - 2 to 5 hours, 3 - 5 to 10 hours, or 4 - >10 hours) 
-15 failures - number of past class failures (numeric: n if 1<=n<3, else 4) 
-16 schoolsup - extra educational support (binary: yes or no) 
-17 famsup - family educational support (binary: yes or no) 
-18 paid - extra paid classes within the course subject (Math or Portuguese) (binary: yes or no) 
-19 activities - extra-curricular activities (binary: yes or no) 
-20 nursery - attended nursery school (binary: yes or no) 
-21 higher - wants to take higher education (binary: yes or no) 
-22 internet - Internet access at home (binary: yes or no) 
-23 romantic - with a romantic relationship (binary: yes or no) 
-24 famrel - quality of family relationships (numeric: from 1 - very bad to 5 - excellent) 
-25 freetime - free time after school (numeric: from 1 - very low to 5 - very high) 
-26 goout - going out with friends (numeric: from 1 - very low to 5 - very high) 
-27 Dalc - workday alcohol consumption (numeric: from 1 - very low to 5 - very high) 
-28 Walc - weekend alcohol consumption (numeric: from 1 - very low to 5 - very high) 
-29 health - current health status (numeric: from 1 - very bad to 5 - very good) 
-30 absences - number of school absences (numeric: from 0 to 93) 
+alc <- read.table("~/Documents/GitHub/IODS-project/data/alc.txt")
+```
+### Data, hyphotheses and selected explanatory variables
 
-# these grades are related with the course subject, Math or Portuguese: 
-31 G1 - first period grade (numeric: from 0 to 20) 
-31 G2 - second period grade (numeric: from 0 to 20) 
-32 G3 - final grade (numeric: from 0 to 20, output target)
+The data of this study has been collected from two Portugese second grade schools by using school reports and questionnaires. Aim of this analysis is to find relationships between high alcohol consumption and hypothesized explanatory variables. 
+
+Hyphotheses: 
+
+- Males consume more alcohol  
+- Better students consume less alcohol
+- Good family relations decrease drinking 
+- Drinking may cause absences
+
+According to hyphotheses, the selected explanatory variables are sex, final grade, family relations and absences. According to first hyphothesis, all analyses have been divided to two groups, females and males.
+
+In dataset there are lot of background variables like demographic, social relationships, parents´education and employment, or living area as well as grades, absences or health. Full descriptions of study is available here: https://archive.ics.uci.edu/ml/datasets/Student+Performance. For alcohol consumption related study, the original data has been modified by combining and averaging weekend and weekdays alcohol consumptions. As result two new variables have been created: alc_use (Likert, 1-5, where 1 = very low, 5 = very high) and high_use (logical, TRUE > 2). Total number of variables after adding is 35. Number of observations is 382, which 198 females, 184 males.
+
+### All variables and distributions
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+gather(alc) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar()
+
+```
+***
+
+### Distributions and observations of chosen variables
+
+##### Relationship between alcohol consumption and sex
+
+As seen in table below, in generally, males consume more alcohol. In low consumption group (very low or low = FALSE), 58% were females and 42% males, whereas in higher consumption group only 37% were females and 63% males.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
+
+table(alc$sex, alc$high_use) %>% addmargins() %>% prop.table()
+
+```
+
+##### Relationship between alcohol consumption and final grades
+
+In males high alcohol consumption influences more to grades than in females. In females the difference between groups is insignificant. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# initialize a plot of high_use and grades
+g1 <- ggplot(alc, aes(x = high_use, y = G3, col = sex))
+g1 + geom_boxplot() + xlab("Alcohol consumption low / high") + ylab("Grades")
+```
+
+##### Relationship between alcohol consumption and absences
+
+Although absences increase due to higher alcohol consumption, difference is quite moderate, thus larger in males.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# initialise a plot of high_use and absences
+g2 <- ggplot(alc, aes(x = high_use, y = absences, col = sex))
+g2 + geom_boxplot() + xlab("Alcohol consumption low / high") + ylab("Absences") 
+
+```
+
+##### Relationship between alcohol consumption and family relations
+
+Although same tendency occur also in this case, there also might be two-sided correlation between alcohol consumption and family relations. Which of them is more cause or consequence is unclear. Bad relationships in family may lead bigger alcohol consumption, but also drinking may evoke collisions between family members.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# initialise a plot of high_use and family relations
+g3 <- ggplot(alc, aes(x = high_use, y = famrel, col = sex))
+g3 + geom_boxplot() + xlab("Alcohol consumption low / high") + ylab("Family relations")
+
+```
+
+### Logistic regression 
+
+All chosen variables are statistically significant. Especially sex is most significant of all and its odd ratio was the highest (2.84). This means that propability for high alcohol consumption in males is almost three times higher than in females. None of the included variables include 1 in confidental interval, which means they all have meaningful influence to the model. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
+# Logistic regression model with chosen variables
+m <- glm(high_use ~ famrel + absences + sex + G3, data = alc, family = "binomial")
+# Summary of the model
+summary(m)
+# Coefficients of the model
+# coef(m)
+# Odds ratios (OR)
+OR <- coef(m) %>% exp
+# Confidence intervals (CI)
+CI <- confint(m) %>% exp
+# Oodds ratios with confidence intervals
+cbind(OR, CI)
+```
+
+### Predictive power of the model
+
+With chosen variables, predictive power of model (penalty) is ~ 0.25 (TRUE-FALSE + FALSE-TRUE pairs summed). This means that about 3/4 of predictions are correct (TRUE-TRUE + FALSE-FALSE pairs summed).
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
+# predict the probability of high_use
+probabilities <- predict(m, type = "response")
+# Adding the new variable, predicted probabilities, to alc
+alc <- mutate(alc, probability = probabilities)
+# Define "high use" in probabilities
+alc <- mutate(alc, prediction = (probability > 0.5))
+# Tabulate high_use versus the predictions with propabilities and margin
+table(high_use = alc$high_use, prediction = alc$prediction) %>% prop.table() %>% addmargins()
+# Plot of 'high_use' versus 'probability' in 'alc'
+g <- ggplot(alc, aes(x = probability, y = high_use, col = prediction)) + geom_point() + aes(col = prediction)
+g 
+```
+
+##### Mean prediction error
+
+Mean prediction error of the model.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
+
+# Define a loss function (mean prediction error)
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+# Compute the average number of wrong predictions in the (training) data by calling loss function
+loss_func(class = alc$high_use, prob = alc$probability)
+
+# compute the average number of wrong predictions in the (training) data
+```
+
+### K-fold cross-validation 
+
+K-fold cross-validation gives slighly higher prediction error.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
+
+cvk <- cv.glm(data = alc, cost = loss_func, glmfit = m, K = nrow(alc))
+cvk$delta[1]
+
+```
+
+### 10-fold cross-validation on my model. 
+
+This model have approximately the same prediction error using 10-fold cross-validation compared to the model introduced in DataCamp (which had about 0.26 error). 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
+
+# 10-fold cross-validation 
+cv10 <- cv.glm(data = alc, cost = loss_func, glmfit = m, K = 10)
+cv10$delta[1]
+
+```
+### Cross-validation to compare the performance of different logistic regression models
+
+The highest amount of predictors is in my original model introduced earlier. Other models are reduced combinations (N=17) of original model. In 10-fold cross validation, the smallest penalty loss was in model with following predictors: Sex, Family relations and Absences. 
+
+```{r echo=FALSE, message=FALSE, comment=''}
+
+# find the model with glm()
+m1 <- glm(high_use ~ famrel + absences + sex + G3, data = alc, family = "binomial")
+m2 <- glm(high_use ~ famrel + absences + sex, data = alc, family = "binomial")
+m3 <- glm(high_use ~ famrel + absences, data = alc, family = "binomial")
+m4 <- glm(high_use ~ famrel, data = alc, family = "binomial")
+m5 <- glm(high_use ~ absences + sex + G3, data = alc, family = "binomial")
+m6 <- glm(high_use ~ famrel + absences+ G3, data = alc, family = "binomial")
+m7 <- glm(high_use ~ famrel + absences + sex, data = alc, family = "binomial")
+m8 <- glm(high_use ~ absences, data = alc, family = "binomial")
+m9 <- glm(high_use ~ absences + sex + G3, data = alc, family = "binomial")
+m10 <- glm(high_use ~ famrel + sex + G3, data = alc, family = "binomial")
+m11 <- glm(high_use ~ famrel + absences + sex, data = alc, family = "binomial")
+m12 <- glm(high_use ~ sex, data = alc, family = "binomial")
+m13 <- glm(high_use ~ famrel + sex, data = alc, family = "binomial")
+m14 <- glm(high_use ~ absences + sex, data = alc, family = "binomial")
+m15 <- glm(high_use ~ sex + G3, data = alc, family = "binomial")
+m16 <- glm(high_use ~ famrel + G3, data = alc, family = "binomial")
+m17 <- glm(high_use ~ absences + G3, data = alc, family = "binomial")
+m18 <- glm(high_use ~ G3, data = alc, family = "binomial")
 
 
-2. The purpose of your analysis is to study the relationships between high/low alcohol consumption and some of the other variables in the data. To do this, choose 4 interesting variables in the data and for each of them, present your personal hypothesis about their relationships with alcohol consumption. (0-1 point)
-
-sex, final grade, family relations, absences
-Hyphothesis: Boys consume more alcohol, more free time - easier to drink, drinking may have caused failures, better students consume less alcohol
-
-3. Numerically and graphically explore the distributions of your chosen variables and their relationships with alcohol consumption (use for example cross-tabulations, bar plots and box plots). Comment on your findings and compare the results of your exploration to your previously stated hypotheses. (0-5 points)
-
-
-
-4. Use logistic regression to statistically explore the relationship between your chosen variables and the binary high/low alcohol consumption variable as the target variable. Present and interpret a summary of the fitted model. Present and interpret the coefficients of the model as odds ratios and provide confidence intervals for them. Interpret the results and compare them to your previously stated hypothesis. Hint: If your model includes factor variables see for example the first answer of this stackexchange thread on how R treats and how you should interpret these variables in the model output (or use some other resource to study this). (0-5 points)
-
-Using the variables which, according to your logistic regression model, had a statistical relationship with high/low alcohol consumption, explore the predictive power of you model. Provide a 2x2 cross tabulation of predictions versus the actual values and optionally display a graphic visualizing both the actual values and the predictions. Compute the total proportion of inaccurately classified individuals (= the training error) and comment on all the results. Compare the performance of the model with performance achieved by some simple guessing strategy. (0-3 points)
-
-Bonus: Perform 10-fold cross-validation on your model. Does your model have better test set performance (smaller prediction error using 10-fold cross-validation) compared to the model introduced in DataCamp (which had about 0.26 error). Could you find such a model? (0-2 points to compensate any loss of points from the above exercises)
-
-Super-Bonus: Perform cross-validation to compare the performance of different logistic regression models (= different sets of predictors). Start with a very high number of predictors and explore the changes in the training and testing errors as you move to models with less predictors. Draw a graph displaying the trends of both training and testing errors by the number of predictors in the model. (0-4 points to compensate any loss of points from the above exercises)
-
+model_vector = c("m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9", "m10", "m11", "m12", "m13", "m14", "m15", "m16", "m17", "m18")
+# print out a summary of the model
+for (i in model_vector) {
+sum <- summary(get(i))
+coe <- coef(get(i))
+#print(sum)
+#print(coe)
+OR <- coe %>% exp
+CI <- confint(get(i)) %>% exp
+ORCI <- cbind(OR, CI)
+# print(OR)
+print(ORCI)
+# cv <- cv.glm(data = alc, cost = loss_func, glmfit = get(i), K = nrow(alc))
+cv <- cv.glm(data = alc, cost = loss_func, glmfit = get(i), K = 10)
+print(cv$delta[1])
 
 
-*Describe the work you have done this week and summarize your learning.*
+probabilities <- predict(get(i), type = "response")
+alc <- mutate(alc, probability = probabilities)
+alc <- mutate(alc, prediction = (probability > 0.5))
+table(high_use = alc$high_use, prediction = alc$prediction) %>% prop.table() %>% addmargins()
+# g <- ggplot(alc, aes(x = probability, y = high_use, col = prediction)) + geom_point() + aes(col = prediction)
+# + geom_point() + aes(col = prediction)
 
-- Describe your work and results clearly. 
-- Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods
-- Assume the reader has no previous knowledge of your data or the more advanced methods you are using  
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+
+lf <- loss_func(class = alc$high_use, prob = alc$probability)
+lf
+}
+
+```

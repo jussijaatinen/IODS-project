@@ -1,6 +1,6 @@
 # Wrangling and Analysis of the data of the third week. Source data is from UCI Machine Learning Repository, Student Performance Data.
 # Jussi Jaatinen
-# 31.10.2018
+# 14.11.2018
 
 # Load used libraries
 
@@ -17,6 +17,8 @@ por <- read.csv("~/Documents/GitHub/IODS-project/data/student-por.csv", header =
 
 str(math)
 str(por)
+
+# Show column names
 
 colnames(math)
 colnames(por)
@@ -74,7 +76,6 @@ gather(alc) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_b
 # produce summary statistics by group
 alc %>% group_by(sex, high_use) %>% summarise(count = n(), mean_grade = mean(G3))
 
-
 # initialize a plot of high_use and G3
 g1 <- ggplot(alc, aes(x = high_use, y = G3, col = sex))
 
@@ -91,7 +92,7 @@ g2 <- ggplot(alc, aes(x = high_use, y = absences, col = sex))
 g2 + geom_boxplot() + ggtitle("Student absences by alcohol consumption and sex")
 
 # find the model with glm()
-m <- glm(high_use ~ failures + absences + sex, data = alc, family = "binomial")
+m <- glm(high_use ~ famres + absences + sex, data = alc, family = "binomial")
 
 # print out a summary of the model
 summary(m)
@@ -99,9 +100,6 @@ summary(m)
 # print out the coefficients of the model
 
 coef(m)
-
-# find the model with glm()
-m <- glm(high_use ~ failures + absences + sex, data = alc, family = "binomial")
 
 # compute odds ratios (OR)
 OR <- coef(m) %>% exp
@@ -111,9 +109,6 @@ CI <- confint(m) %>% exp
 
 # print out the odds ratios with their confidence intervals
 cbind(OR, CI)
-
-# fit the model
-m <- glm(high_use ~ failures + absences + sex, data = alc, family = "binomial")
 
 # predict() the probability of high_use
 probabilities <- predict(m, type = "response")
@@ -125,7 +120,7 @@ alc
 alc <- mutate(alc, prediction = (probability > 0.5))
 
 # see the last ten original classes, predicted probabilities, and class predictions
-select(alc, failures, absences, sex, high_use, probability, prediction) %>% tail(10)
+select(alc, famres, absences, sex, high_use, probability, prediction) %>% tail(10)
 
 # tabulate the target variable versus the predictions
 table(high_use = alc$high_use, prediction = alc$prediction)
@@ -148,11 +143,6 @@ loss_func <- function(class, prob) {
 # call loss_func to compute the average number of wrong predictions in the (training) data
 loss_func(class = alc$high_use, prob = alc$probability)
 
-# define a loss function (average prediction error)
-loss_func <- function(class, prob) {
-  n_wrong <- abs(class - prob) > 0.5
-  mean(n_wrong)
-}
 
 # compute the average number of wrong predictions in the (training) data
 
@@ -160,6 +150,10 @@ loss_func <- function(class, prob) {
 # K-fold cross-validation
 library(boot)
 cv <- cv.glm(data = alc, cost = loss_func, glmfit = m, K = nrow(alc))
+
+# 10-fold cross-validation
+
+cv <- cv.glm(data = alc, cost = loss_func, glmfit = m, K = 10)
 
 # average number of wrong predictions in the cross validation
 cv$delta[1]
