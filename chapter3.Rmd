@@ -54,7 +54,7 @@ As seen in table below, in generally, males consume more alcohol. In low consump
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
-table(alc$sex, alc$high_use) %>% addmargins() %>% prop.table()
+table(alc$sex, alc$high_use) %>% addmargins() 
 
 ```
 

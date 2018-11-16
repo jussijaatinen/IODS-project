@@ -341,10 +341,10 @@ F-statistic: 38.61 on 1 and 164 DF,  p-value: 4.119e-09</code></pre>
 <h5>Relationship between alcohol consumption and sex</h5>
 <p>As seen in table below, in generally, males consume more alcohol. In low consumption group (very low or low = FALSE), 58% were females and 42% males, whereas in higher consumption group only 37% were females and 63% males.</p>
 <pre><code>     
-           FALSE       TRUE        Sum
-  F   0.10209424 0.02748691 0.12958115
-  M   0.07329843 0.04712042 0.12041885
-  Sum 0.17539267 0.07460733 0.25000000</code></pre>
+      FALSE TRUE Sum
+  F     156   42 198
+  M     112   72 184
+  Sum   268  114 382</code></pre>
 </div>
 <div id="relationship-between-alcohol-consumption-and-going-out-with-friends" class="section level5">
 <h5>Relationship between alcohol consumption and going out with friends</h5>
@@ -425,7 +425,7 @@ high_use      FALSE       TRUE        Sum
 <div id="fold-cross-validation-on-my-model." class="section level3">
 <h3>10-fold cross-validation on my model.</h3>
 <p>This model have smaller prediction error (0.20) using 10-fold cross-validation compared to the model introduced in DataCamp (which had about 0.26 error). This means that chosen variables in my model predict better high alcohol consumption.</p>
-<pre><code>[1] 0.2172775</code></pre>
+<pre><code>[1] 0.2120419</code></pre>
 <hr />
 </div>
 <div id="cross-validation-to-compare-the-performance-of-different-logistic-regression-models" class="section level3">
@@ -437,34 +437,34 @@ famrel      0.67449969 0.51060362 0.8869199
 absences    1.08510512 1.04012840 1.1353940
 sexM        2.75203774 1.66768032 4.6128191
 goout       2.15461275 1.70345866 2.7639914
-[1] 0.2068063
+[1] 0.2015707
                    OR     2.5 %    97.5 %
 (Intercept) 0.4877368 0.1702903 1.3635949
 famrel      0.7475910 0.5811204 0.9595347
 absences    1.0980228 1.0524564 1.1504519
 sexM        2.7976292 1.7476499 4.5467291
-[1] 0.2565445
+[1] 0.2801047
                    OR     2.5 %   97.5 %
 (Intercept) 0.7187304 0.2621851 1.935500
 famrel      0.7857743 0.6158556 1.001830
 absences    1.0905430 1.0452818 1.142647
-[1] 0.2827225
+[1] 0.2931937
                    OR     2.5 %    97.5 %
 (Intercept) 1.1938851 0.4610715 3.0668110
 famrel      0.7673146 0.6041200 0.9734032
-[1] 0.3010471
+[1] 0.3089005
                     OR       2.5 %     97.5 %
 (Intercept) 0.01555815 0.005885392 0.03804621
 absences    1.08782902 1.042458467 1.13933894
 sexM        2.60835292 1.593132148 4.33151387
 goout       2.07468346 1.650182481 2.64111050
-[1] 0.2225131
+[1] 0.2198953
                    OR      2.5 %    97.5 %
 (Intercept) 0.0917904 0.02572428 0.3085338
 famrel      0.7047893 0.53909482 0.9181526
 absences    1.0772983 1.03352289 1.1268709
 goout       2.1613089 1.71931650 2.7529251
-[1] 0.2513089
+[1] 0.2434555
                    OR     2.5 %    97.5 %
 (Intercept) 0.4877368 0.1702903 1.3635949
 famrel      0.7475910 0.5811204 0.9595347
@@ -474,25 +474,25 @@ sexM        2.7976292 1.7476499 4.5467291
                    OR     2.5 %    97.5 %
 (Intercept) 0.2775097 0.2012914 0.3760343
 absences    1.0939748 1.0479459 1.1468072
-[1] 0.2853403
+[1] 0.2827225
                     OR       2.5 %     97.5 %
 (Intercept) 0.01555815 0.005885392 0.03804621
 absences    1.08782902 1.042458467 1.13933894
 sexM        2.60835292 1.593132148 4.33151387
 goout       2.07468346 1.650182481 2.64111050
-[1] 0.2146597
+[1] 0.2120419
                     OR      2.5 %    97.5 %
 (Intercept) 0.09489664 0.02602013 0.3241397
 famrel      0.66248876 0.50299888 0.8679153
 sexM        2.54505957 1.56349803 4.1969640
 goout       2.21913298 1.76086023 2.8372779
-[1] 0.2303665
+[1] 0.2356021
                    OR     2.5 %    97.5 %
 (Intercept) 0.4877368 0.1702903 1.3635949
 famrel      0.7475910 0.5811204 0.9595347
 absences    1.0980228 1.0524564 1.1504519
 sexM        2.7976292 1.7476499 4.5467291
-[1] 0.2670157
+[1] 0.2617801
                    OR     2.5 %    97.5 %
 (Intercept) 0.2692308 0.1891905 0.3746607
 sexM        2.3877551 1.5268584 3.7716682
@@ -501,17 +501,17 @@ sexM        2.3877551 1.5268584 3.7716682
 (Intercept) 0.8774021 0.3274356 2.3203334
 famrel      0.7331474 0.5730317 0.9356179
 sexM        2.5191408 1.6005358 4.0108387
-[1] 0.2905759
+[1] 0.2879581
                   OR     2.5 %    97.5 %
 (Intercept) 0.159445 0.1012577 0.2427684
 absences    1.101409 1.0549317 1.1548057
 sexM        2.658116 1.6710354 4.2863129
-[1] 0.2643979
+[1] 0.2617801
                     OR       2.5 %     97.5 %
 (Intercept) 0.02208168 0.008754964 0.05186666
 sexM        2.39559680 1.484457552 3.91015147
 goout       2.14025612 1.708110942 2.71701439
-[1] 0.2539267
+[1] 0.2329843
                    OR      2.5 %    97.5 %
 (Intercept) 0.1314829 0.03816207 0.4283774
 famrel      0.6930400 0.53161279 0.8999454
@@ -521,7 +521,7 @@ goout       2.2081701 1.76229526 2.8045361
 (Intercept) 0.026083 0.01076768 0.05922061
 absences    1.080069 1.03581041 1.13071158
 goout       2.087359 1.66817170 2.64318173
-[1] 0.2382199
+[1] 0.2408377
                     OR      2.5 %     97.5 %
 (Intercept) 0.03504298 0.01505792 0.07687797
 goout       2.13743726 1.71351154 2.69965289
@@ -539,7 +539,7 @@ famsizeLE3  1.416227556 8.057840e-01 2.4756274
 romanticyes 0.627696639 3.507903e-01 1.1001635
 health      1.145482751 9.468044e-01 1.3925122
 goout       2.042410603 1.593579e+00 2.6564950
-[1] 0.2356021</code></pre>
+[1] 0.2198953</code></pre>
 <hr />
 <hr />
 </div>
