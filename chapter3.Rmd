@@ -16,6 +16,9 @@ library(boot)
 
 alc <- read.table("~/Documents/GitHub/IODS-project/data/alc.txt")
 ```
+
+***
+
 ### Data, hyphotheses and selected explanatory variables
 
 The data of this study has been collected from two Portugese second grade schools by using school reports and questionnaires. Aim of this analysis is to find relationships between high alcohol consumption and hypothesized explanatory variables. 
@@ -31,6 +34,8 @@ According to hyphotheses, the selected explanatory variables are sex, final grad
 
 In dataset there are lot of background variables like demographic, social relationships, parents´education and employment, or living area as well as grades, absences or health. Full descriptions of study is available here: https://archive.ics.uci.edu/ml/datasets/Student+Performance. For alcohol consumption related study, the original data has been modified by combining and averaging weekend and weekdays alcohol consumptions. As result two new variables have been created: alc_use (Likert, 1-5, where 1 = very low, 5 = very high) and high_use (logical, TRUE > 2). Total number of variables after adding is 35. Number of observations is 382, which 198 females, 184 males.
 
+***
+
 ### All variables and distributions
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
@@ -38,6 +43,7 @@ In dataset there are lot of background variables like demographic, social relati
 gather(alc) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar()
 
 ```
+
 ***
 
 ### Distributions and observations of chosen variables
@@ -86,6 +92,8 @@ g3 + geom_boxplot() + xlab("Alcohol consumption low / high") + ylab("Family rela
 
 ```
 
+***
+
 ### Logistic regression 
 
 All chosen variables are statistically significant. Especially sex is most significant of all and its odd ratio was the highest (2.84). This means that propability for high alcohol consumption in males is almost three times higher than in females. None of the included variables include 1 in confidental interval, which means they all have meaningful influence to the model. 
@@ -104,6 +112,8 @@ CI <- confint(m) %>% exp
 # Oodds ratios with confidence intervals
 cbind(OR, CI)
 ```
+
+***
 
 ### Predictive power of the model
 
@@ -140,6 +150,8 @@ loss_func(class = alc$high_use, prob = alc$probability)
 # compute the average number of wrong predictions in the (training) data
 ```
 
+***
+
 ### K-fold cross-validation 
 
 K-fold cross-validation gives slighly higher prediction error.
@@ -150,6 +162,8 @@ cvk <- cv.glm(data = alc, cost = loss_func, glmfit = m, K = nrow(alc))
 cvk$delta[1]
 
 ```
+
+***
 
 ### 10-fold cross-validation on my model. 
 
@@ -162,6 +176,9 @@ cv10 <- cv.glm(data = alc, cost = loss_func, glmfit = m, K = 10)
 cv10$delta[1]
 
 ```
+
+***
+
 ### Cross-validation to compare the performance of different logistic regression models
 
 The highest amount of predictors is in my original model introduced earlier. Other models are reduced combinations (N=17) of original model. In 10-fold cross validation, the smallest penalty loss was in model with following predictors: Sex, Family relations and Absences. 
@@ -223,3 +240,5 @@ lf
 }
 
 ```
+
+***

@@ -81,4 +81,3 @@ a <- c(1, 2, 5)
 plot(My_model5, which = a)
 ```
 
-***
