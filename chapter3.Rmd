@@ -32,11 +32,24 @@ Hyphotheses:
 
 According to hyphotheses, the selected explanatory variables are sex, go out, family relations and absences. According to first hyphothesis, all analyses have been divided to two groups, females and males.
 
-In dataset there are lot of background variables like demographic, social relationships, parents´education and employment, or living area as well as grades, absences or health. Full descriptions of study is available here: https://archive.ics.uci.edu/ml/datasets/Student+Performance. For alcohol consumption related study, the original data has been modified by combining and averaging weekend and weekdays alcohol consumptions. As result two new variables have been created: alc_use (Likert, 1-5, where 1 = very low, 5 = very high) and high_use (logical, TRUE > 2). Total number of variables after adding is 35. Number of observations is 382, which 198 females, 184 males.
+In dataset there are lot of background variables like demographic, social relationships, parents´education and employment, or living area as well as grades, absences or health. 
+
+Full descriptions of study is available here: https://archive.ics.uci.edu/ml/datasets/Student+Performance. 
 
 ***
 
 ### All variables and distributions
+
+Observations about selected explanatory variables:
+
+- Sex: Student's sex, 198 females, 184 males ('F' - female or 'M' - male) 
+- Goout: Going out with friends, quite normally distributed, median 3 (1 - very low, 5 - very high)
+- Famrel: Quality of family relationships, negatively skewed, median 4 (1 - very bad, 5 - excellent)
+- Absences: Number of school absences, multimodal, not normally distributed, median 3 (min. 0 - max. 45)
+
+For alcohol consumption related study, the original data has been modified by combining and averaging weekend and weekdays alcohol consumptions. As result two new variables have been created: alc_use (Likert, 1-5, where 1 = very low, 5 = very high) and high_use (logical, TRUE > 2).
+
+Total number of variables after adding is 35. Number of observations is 382. All variables and their distributions can be seen below.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -96,7 +109,9 @@ g3 + geom_boxplot() + xlab("Alcohol consumption low / high") + ylab("Family rela
 
 ### Logistic regression 
 
-All chosen variables are statistically significant. Especially sex is most significant of all and its odd ratio was the highest (2.84). This means that propability for high alcohol consumption in males is almost three times higher than in females. Another strongly influencing variable is "Going out with friends" (goout). None of the included variables include 1 in confidental interval, which means they all have meaningful influence to the model. 
+In logistic binomial regression selected explanatory variables (discret or continuous) explain dependent binary (high_use) variable. In this case, dependent variable is categorical, alcohol high use (high_use). It has constructed by classifying aforementioned alc_use variable. Values 1 and 2 of alc_use have been classified to low or false and values 3 - 5 to high or true.
+
+All chosen variables (sex, goout, famrel and absences) are statistically significant. Especially sex is most significant of all and its odd ratio was the highest (2.84). This means that propability for high alcohol consumption in males is almost three times higher than in females. Another strongly influencing variable is "Going out with friends" (goout). None of the included variables include 1 in confidental interval, which means they all have meaningful influence to the model. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 # Logistic regression model with chosen variables
@@ -135,7 +150,7 @@ g
 
 ##### Mean prediction error
 
-Mean prediction error of the model.
+Mean prediction error of the model (loss function). This is determined by calculating propability of incorrect predictions.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
@@ -154,7 +169,9 @@ loss_func(class = alc$high_use, prob = alc$probability)
 
 ### K-fold cross-validation 
 
-K-fold cross-validation gives slighly higher prediction error.
+For testing power of the chosen model, a method called cross-validation can be used. In cross validation sample data has been divided to test and train sections. This means that for example data is divided to 5 equal size parts and 4/5 is used as train data and 1/5 as test data. That is called 5-fold cross-validation. In K-fold CV data has divided to K parts, in this case K = number of observations. So, train data includes K-1 observations and test data 1 observations. In this function this process is circulated so all parts of data is in turn either train or test data. 
+
+In this case, K-fold cross-validation gives slighly higher prediction error (0.21) compared to mean prediction error.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
@@ -181,7 +198,7 @@ cv10$delta[1]
 
 ### Cross-validation to compare the performance of different logistic regression models
 
-The highest amount of predictors is in my original model introduced earlier. Other models are reduced combinations of original model or added to the model previously unused variables (N=18). In 10-fold cross validation, the smallest penalty loss (0.20) was in my original model. Changing variables increased or decreased penalty loss depending on significancy of chosen variables.
+The highest amount of predictors is in my original model introduced earlier. Other models are reduced combinations of original model or added to the model previously unused variables (N=18). In 10-fold cross validation, the smallest penalty loss (0.21) was in my original model. Changing variables increased or decreased penalty loss depending on significancy of chosen variables.
 
 ```{r echo=FALSE, message=FALSE, comment=''}
 
