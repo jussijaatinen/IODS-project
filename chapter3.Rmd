@@ -184,7 +184,7 @@ cvk$delta[1]
 
 ### 10-fold cross-validation on my model. 
 
-This model have smaller prediction error (0.20) using 10-fold cross-validation compared to the model introduced in DataCamp (which had about 0.26 error). This means that chosen variables in my model predict better high alcohol consumption.
+This model have smaller prediction error (0.21) using 10-fold cross-validation compared to the model introduced in DataCamp (which had about 0.26 error). This means that chosen variables in my model predict better high alcohol consumption.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
