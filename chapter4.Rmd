@@ -2,6 +2,10 @@
 title: "Analysis of Boston data"
 author: "Jussi Jaatinen"
 output: html_document
+fig_caption: true
+fig_width: 15
+fig_height: 8
+code_folding: hide
 ---
 
 # Analysis of Boston data
@@ -10,10 +14,25 @@ output: html_document
 
 Boston data is included to R-package as a demonstartion or example.
 
-describe the dataset briefly.
+Dataset contains information about Boston area. It includes following variables:
 
+- crim = per capita crime rate by town             
+- zn = proportion of residential land zoned for lots over 25,000 sq.ft.    
+- indus =  proportion of non-retail business acres per town				
+- chas = Charles River dummy variable 
+- nox =  nitrogen oxides concentration (parts per 10 million)
+- rm = average number of rooms per dwelling
+- age  = proportion of owner-occupied units built prior to 1940
+- dis = weighted mean of distances to five Boston employment centres
+- rad = index of accessibility to radial highways
+- tax =  full-value property-tax rate per $10000  
+- ptratio = pupil-teacher ratio by town
+- black = 1000(Bk - 0.63)^2 where Bk is the proportion of blacks by town
+- lstat = lower status of the population (percent)
+- medv = median value of owner-occupied homes in $1000s
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
+# Loading necessary libraries
 library(MASS)
 library(dplyr)
 library(plotly)
@@ -26,6 +45,7 @@ data("Boston")
 
 ##### Structure and the dimensions of the data 
 
+Dataset has 14 variables and 506 observationsand all variables are numerical.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 str(Boston)
@@ -33,69 +53,50 @@ dim(Boston)
 
 ```
 
-##### Summary of variables
+##### Summary, graphical presentation of data and correlations
 
-show summaries of the variables in the data.
+As seen in pairs plot, most of the variables are not normally distributed. Most of them are skewed and some of them are bimodal. Correlations between variables are better viewed in correlation plotting, where on the upper-right side the biggest circles indicate highest correlations (blue = positive or red = negative). Corresponding number values are mirrored on the lower-left side.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 summary(Boston)
-```
-
-##### Graphical presentation of data using pairs
-
-Describe and interpret the outputs, commenting on the distributions of the variables and the relationships between them.
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-# plot matrix of the variables
-
 # pairs(Boston)
-ggpairs(Boston, mapping = aes(), lower = list(combo = wrap("facethist", bins = 20)))
-```
-##### Correlations between variable
-
-Show a graphical overview of the data and 
-Describe and interpret the outputs, commenting on the distributions of the variables and the relationships between them.
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
+# ggpairs(Boston, mapping = aes(), lower = list(combo = wrap("facethist", bins = 40)), upper = list(continuous = wrap("cor", size = 12)))
+ggpairs(Boston, mapping = aes(corSize = 8), lower = list(combo = wrap("facethist", bins = 100)))
 
 # calculate the correlation matrix and round it
 cor_matrix<-cor(Boston) %>% round(digits = 2)
 # visualize the correlation matrix
-corrplot(cor_matrix, method="circle", type = "upper", cl.pos = "b", tl.pos = "d", tl.cex = 0.6)
+# corrplot(cor_matrix, method="circle", type = "upper", cl.pos = "b", tl.pos = "d", tl.cex = 0.6)
+corrplot.mixed(cor_matrix, number.cex = .7, tl.pos = "d", tl.cex = 0.6)
 
 ```
 
 ***
 ## Standardization
 
-In standardization means of all variables are in zero. That is, variables have distributed around zero. This can be seen in summary table.
+In standardization means of all variables are in zero. That is, variables have distributed around zero. This can be seen in summary table (compare with original summary above).
 
-Create a categorical variable of the crime rate in the Boston dataset (from the scaled crime rate). Use the quantiles as the break points in the categorical variable. Drop the old crime rate variable from the dataset. Divide the dataset to train and test sets, so that 80% of the data belongs to the train set. (0-2 points)
+Variable crime rate has been changed to categorical variable with 4 levels: low, med_low, med_high and high. Each class includes quantile of data (25%). 
 
+Train and test sets have been created by dividing original (standardized) data to two groups randomly. 80% belongs to train set and 20% to test set.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-# Standardization of the dataset
 
+# Standardization of the dataset
 boston_scaled <- scale(Boston)
 summary(boston_scaled)
-# class of the boston_scaled object
-class(boston_scaled)
 # change the object to data frame
 boston_scaled <- as.data.frame(boston_scaled)
-
-# Categoricazation of the variable of the crime rate in the scaled Boston dataset using quantiles as break points.As result we have a four-step categorial variable (from the scaled crime rate). Use the quantiles as the break points in the categorical variable. Drop the old crime rate variable from the dataset. Divide the dataset to train and test sets, so that 80% of the data belongs to the train set.
-# create a quantile vector of crim and print it
+# create a quantile vector of crim
 bins <- quantile(boston_scaled$crim)
 # create a categorical variable 'crime'
 crime <- cut(boston_scaled$crim, breaks = bins, include.lowest = TRUE, label = c("low", "med_low", "med_high", "high"))
-# look at the table of the new factor crime
-table(crime)
-# remove original crim from the dataset
+# removing original crim
 boston_scaled <- dplyr::select(boston_scaled, -crim)
-# add the new categorical value to scaled data
+# adding the new categorical value to scaled data
 boston_scaled <- data.frame(boston_scaled, crime)
 
-
+# Creation of train and test data sets
 n <- nrow(boston_scaled)
 # choose randomly 80% of the rows
 ind <- sample(n,  size = n * 0.8)
@@ -106,10 +107,11 @@ test <- boston_scaled[-ind,]
 # save the correct classes from test data
 correct_classes <- test$crime
 # remove the crime variable from test data
-# test <- dplyr::select(test, -crime)
+test <- dplyr::select(test, -crime)
 
 
 ```
+
 Fit the linear discriminant analysis on the train set. Use the categorical crime rate as the target variable and all the other variables in the dataset as predictor variables. Draw the LDA (bi)plot.
   
 
@@ -142,15 +144,9 @@ lda.arrows(lda.fit, myscale = 2)
 
  Save the crime categories from the test set and then remove the categorical crime variable from the test dataset. Then predict the classes with the LDA model on the test data. Cross tabulate the results with the crime categories from the test set. Comment on the results. 
 
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
-# Save the crime categories from the test set and then remove the categorical crime variable from the test dataset. 
-# save the correct classes from test data
-correct_classes <- test$crime
-# remove the crime variable from test data
-test <- dplyr::select(test, -crime)
-
-# Then predict the classes with the LDA model on the test data.
 # predict classes with test data
 lda.pred <- predict(lda.fit, newdata = test)
 
@@ -162,8 +158,6 @@ correct_pred <- tab[1,1] + tab[2,2] + tab[3,3] + tab[4,4]
 incorrect_pred <- tab[5,5] - (tab[1,1] + tab[2,2] + tab[3,3] + tab[4,4]) 
 pred_error <- incorrect_pred / tab[5,5]
 pred_error
-
-
 ```
 
 Calculate the distances between the observations. Run k-means algorithm on the dataset. Investigate what is the optimal number of clusters and run the algorithm again. Visualize the clusters (for example with the pairs() or ggpairs() functions, where the clusters are separated with colors) and interpret the results. (0-4 points)  
