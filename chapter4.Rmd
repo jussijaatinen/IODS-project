@@ -12,7 +12,7 @@ code_folding: hide
 
 ### Overview of data
 
-Boston data is included in R-package as a demonstartion or example.
+Boston data is included in R-package as a demonstration or example.
 
 Dataset contains social, environmental and economical information about great Boston area. It includes following variables:
 
@@ -217,14 +217,16 @@ ggpairs(boston_scaled, mapping = aes(col = as.factor(km$cluster), alpha = 0.3), 
 
 ### Bonus 
 
-Here LDA is calculated with the clusters as target classes. All other variables in the Boston data are predictor variables. In LDA tables and biplots, differences between number of clusters can be seen. Variable "rad" is the most influencial linear separator for the clusters in LD1 and variable "zn" in LD2. At the moment Knitting does not accept my code. Code is visible below. I tried to fix this later.
+Here LDA is calculated with the clusters as target classes. All other variables in the Boston data are predictor variables. In LDA tables and biplots, differences between number of clusters can be seen. Depending on number of clusters, meaningful variables are different, as seen in plottings. 
 
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
 data("Boston")
 boston_scaled <- scale(Boston)
 boston_scaled <- as.data.frame(boston_scaled)
+boston_scaled_new <- dplyr::select(boston_scaled, -chas)
 
-the function for lda biplot arrows
+# the function for lda biplot arrows
 
 lda.arrows <- function(x, myscale = 1, arrow_heads = 0.1, color = "red", tex = 0.75, choices = c(1,2)){
   heads <- coef(x)
@@ -235,13 +237,13 @@ lda.arrows <- function(x, myscale = 1, arrow_heads = 0.1, color = "red", tex = 0
        cex = tex, col=color, pos=3)
 }
 
-km3 <-kmeans(boston_scaled, centers = 3)
+km3 <-kmeans(boston_scaled_new, centers = 3)
 
-km4 <-kmeans(boston_scaled, centers = 4)
+km4 <-kmeans(boston_scaled_new, centers = 4)
 
-km5 <-kmeans(boston_scaled, centers = 5)
+km5 <-kmeans(boston_scaled_new, centers = 5)
 
-km6 <-kmeans(boston_scaled, centers = 6)
+km6 <-kmeans(boston_scaled_new, centers = 6)
 
 clu3 <- as.factor(km3$cluster)
 
@@ -251,45 +253,45 @@ clu5 <- as.factor(km5$cluster)
 
 clu6 <- as.factor(km6$cluster)
 
-lda.fit3 <- lda(clu3 ~ ., data = boston_scaled)
+lda.fit3 <- lda(clu3 ~ ., data = boston_scaled_new)
 
 lda.fit3
 
-lda.fit4 <- lda(clu4 ~ ., data = boston_scaled)
+lda.fit4 <- lda(clu4 ~ ., data = boston_scaled_new)
 
 lda.fit4
 
-lda.fit5 <- lda(clu5 ~ ., data = boston_scaled)
+lda.fit5 <- lda(clu5 ~ ., data = boston_scaled_new)
 
 lda.fit5
 
-lda.fit6 <- lda(clu6 ~ ., data = boston_scaled)
+lda.fit6 <- lda(clu6 ~ ., data = boston_scaled_new)
 
 lda.fit6
 
-target classes as numeric
+# target classes as numeric
 
-classes <- as.numeric(clu3)
+classes3 <- as.numeric(clu3)
+plot(lda.fit3, dimen = 2, col = classes3, pch = classes3)
+lda.arrows(lda.fit3, myscale = 1)
 
-plot(lda.fit3, dimen = 2, col = classes, pch = classes)
-lda.arrows(lda.fit, myscale = 1)
+classes4 <- as.numeric(clu4)
+plot(lda.fit4, dimen = 2, col = classes4, pch = classes4)
+lda.arrows(lda.fit4, myscale = 1)
 
-classes <- as.numeric(clu4)
-plot(lda.fit4, dimen = 2, col = classes, pch = classes)
-lda.arrows(lda.fit, myscale = 1)
+classes5 <- as.numeric(clu5)
+plot(lda.fit5, dimen = 2, col = classes5, pch = classes5)
+lda.arrows(lda.fit5, myscale = 1)
 
-classes <- as.numeric(clu5)
-plot(lda.fit5, dimen = 2, col = classes, pch = classes)
-lda.arrows(lda.fit, myscale = 1)
+classes6 <- as.numeric(clu6)
+plot(lda.fit6, dimen = 2, col = classes6, pch = classes6)
+lda.arrows(lda.fit6, myscale = 1)
 
-classes <- as.numeric(clu6)
-plot(lda.fit6, dimen = 2, col = classes, pch = classes)
-lda.arrows(lda.fit, myscale = 1)
-
+```
 
 ### Super-Bonus
 
-Adjust the code: add argument color as a argument in the plot_ly() function. Set the color to be the crime classes of the train set. Draw another 3D plot where the color is defined by the clusters of the k-means. How do the plots differ? Are there any similarities? 
+Data points are of course in same positions. Grouping differs slightly in main group if colours are coded either by crime or by cluster. In the separate group high-crime is well isolated whereas in clusters, there are two of them. If colours are coded by crime, particularly the high-crime is better gathered to one group.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
@@ -330,8 +332,6 @@ k_mean_colour <- as.numeric(clu8)
 ```
 
 ##### Train data classified by Crime (1 = low, 4 = high)
-
-Data points are of course in same positions. Grouping differs slightly in main group if colours are coded either by crime or by cluster. In the separate group high-crime is well isolated whereas in clusters, there are two of them. If colours are coded by crime, particularly the high-crime is better gathered to one group.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
