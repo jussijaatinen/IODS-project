@@ -297,7 +297,7 @@ Data points are of course in same positions. Grouping differs slightly in main g
 
 data("Boston")
 boston_scaled <- scale(Boston)
-summary(boston_scaled)
+# summary(boston_scaled)
 # change the object to data frame
 boston_scaled <- as.data.frame(boston_scaled)
 # create a quantile vector of crim
