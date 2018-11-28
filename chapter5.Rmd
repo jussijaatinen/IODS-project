@@ -1,62 +1,185 @@
 ---
-title: "Analysis of "
+title: "PCA analysis of human data"
 author: "Jussi Jaatinen"
 output: html_document
+fig_caption: true
+fig_width: 15
+fig_height: 8
+code_folding: hide
 ---
 
-# Analysis of 
+# PCA analysis of human data 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
+
+library(ggplot2)
+library(GGally)
+library(FactoMineR)
+library(tidyr)
+
+```
+
+## Overview of data
+
+Data for this analysis is from the United Nations Development Programme. Two datasets have been combined, Human Development Index (HDI) and Gender Inequality Index (GII). As a result, the new dataset includes following variables:
+
+- Life_Exp     = Expected lifetime in years
+- Edu_Exp      = Expected education time in years
+- GNI          = Gross National Income
+- Mat_Mortal   = Maternal mortality per 1000 
+- Teen_Preg    = Teen pregnancy per 1000 
+- F_Rep_Parl   = Female members in parliament (%)
+- Edu_Rto_FM   = Ratio between females and males in education
+- Work_Rto_FM  = Ratio between females and males in labour
+
+Most of variables are to some extend skewed. In correlation matrix high positive and negative correlations can be throughout seen. Actually, most of the variables of this dataset correlated strongly. Only F_Rep_Parl and Work_Rto_FM had weak correlations to all other variables.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
+
+library(ggplot2)
+library(GGally)
+library(FactoMineR)
+library(tidyr)
+library(corrplot)
+
+human <- read.table(file = "~/Documents/GitHub/IODS-project/data/human.txt", sep = "")
+summary(human)
+ggpairs(human, mapping = aes(corSize = 8), lower = list(combo = wrap("facethist", bins = 100)))
+
+cor_matrix<-cor(human) %>% round(digits = 2)
+# visualize the correlation matrix
+corrplot(cor_matrix)
+
+```
+
+## Principal component analysis (PCA)
+
+In principal component analysis the original multidimensional data is transformed to new space. Most of the cases the number of dimensions has been  diminished. The new dimensions are called principal components. Principal components are uncorrelated to each other. The first principal component explains maximum amount of variance in original data. The second component is orthogonal to the first and explains maximum variance left. This principle continues similarly with next components and each of them are less important compared to the previous one. If eigenvalue of the component is smaller than one, it usually can be left out (see PCA tables below). In biplots, PC1 is usually visualized on x-axis and PC2 in y-axis. Arrows and labels show connections between the original features and the principal components (usually PC1 and PC2).
+
+
+In biplots angles between arrows correspond correlations of the original features. The smaller the angle, the higher is positive correlation. If two arrows are parallel but point to opposite directions, it indicates high negative correlation. 90 degree's angle means zero correlation (orthogonal = compare to x-axis (PC1) and y-axis (PC2)). The length of the arrows shows the standard deviations of the original features.
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
+
+
+# perform principal component analysis (with the SVD method)
+pca_human <- prcomp(human)
+
+# draw a biplot of the principal component representation and the original variables
+biplot(pca_human, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "deeppink2"))
+
+summary(human)
+
+# perform principal component analysis (with the SVD method)
+pca_human <- prcomp(human)
+# summary(pca_human_std)
+pca2_human <- PCA(human)
+summary(pca2_human)
+# draw a biplot of the principal component representation and the original variables
+biplot(pca_human, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "deeppink2"))
+# create and print out a summary of pca_human
+s <- summary(pca_human)
+s
+# rounded percetanges of variance captured by each PC
+pca_pr <- round(100*s$importance[2, ], digits = 1)
+# print out the percentages of variance
+pca_pr
+# create object pc_lab to be used as axis labels
+pc_lab <- paste0(names(pca_pr), " (", pca_pr, "%)")
+# draw a biplot
+biplot(pca_human, cex = c(0.8, 1), col = c("grey40", "deeppink2"), xlab = pc_lab[1], ylab = pc_lab[2])
+
+
+
+
+```
+
+## Standardization of data and PCA
+
+Standardize the variables in the human data and repeat the above analysis. Interpret the results of both analysis (with and without standardizing). Are the results different? Why or why not? Include captions (brief descriptions) in your plots where you describe the results by using not just your variable names, but the actual phenomenons they relate to. (0-4 points)
+
+Due to PCA is sensitive to the scaling, large variance of the original feature get greater importance compared to a feature with smaller variance.
+Standardization of the original data equalizes importance between original fatures. 
+
+In following table and biplot below, PCA analysis itself is the same as above, but original data has been standardized before calculating PCA.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment='', out.width = "200%", out}
+
+# standardize the variables
+human_std <- scale(human)
+summary(human_std)
+
+# perform principal component analysis (with the SVD method)
+pca_human_std <- prcomp(human_std)
+# summary(pca_human_std)
+pca2_human_std <- PCA(human_std)
+summary(pca2_human_std)
+# draw a biplot of the principal component representation and the original variables
+biplot(pca_human_std, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "deeppink2"))
+# create and print out a summary of pca_human
+s <- summary(pca_human_std)
+s
+# rounded percetanges of variance captured by each PC
+pca_pr <- round(100*s$importance[2, ], digits = 1)
+# print out the percentages of variance
+pca_pr
+# create object pc_lab to be used as axis labels
+pc_lab <- paste0(names(pca_pr), " (", pca_pr, "%)")
+# draw a biplot
+biplot(pca_human_std, cex = c(0.8, 1), col = c("grey40", "deeppink2"), xlab = pc_lab[1], ylab = pc_lab[2])
+
+
+
+```
+
+## Interpretations of PC1 and PC2
+
+Give your personal interpretations of the first two principal component dimensions based on the biplot drawn after PCA on the standardized human data. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
+## Tea
 
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
+Explore the data briefly: look at the structure and the dimensions of the data and visualize it.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
+library(ggplot2)
+library(GGally)
+library(FactoMineR)
+library(tidyr)
+library(dplyr)
+data(tea)
+keep_columns <- c("Tea", "How", "how", "sugar", "where", "lunch")
+
+# select the 'keep_columns' to create a new dataset
+tea_time <- select(tea, one_of(keep_columns))
+summary(tea_time)
+str(tea_time)
+# visualize the dataset
+gather(tea_time) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar() + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+
 ```
+
+## Multiple Correspondence Analysis on the tea data
+
+Then do Multiple Correspondence Analysis on the tea data (or to a certain columns of the data, it’s up to you). Interpret the results of the MCA and draw at least the variable biplot of the analysis. You can also explore other plotting options for MCA. Comment on the output of the plots. (0-4 points)
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
+mca <- MCA(tea_time, graph = FALSE)
+# summary of the model
+summary(mca)
+# visualize MCA
+plot(mca, invisible=c("ind"), habillage = "quali")
 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
-```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
-```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
