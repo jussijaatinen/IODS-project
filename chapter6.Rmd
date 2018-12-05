@@ -10,11 +10,12 @@ If the same person makes several observations in same experiment or the weight o
 
 Two such kind of datasets are wrangled and analyzed in this excercise. First set, RATS, includes information about different nutritions and their influence to the weight of rats during 9 weeks period. In the second set, BPRS, 40 male subjects were randomly assigned to two groups and each subject was rated on the brief psychiatric rating scale (BPRS) measured before treatment and then at weekly intervals for eight weeks.The scale is used to evaluate patients suspected of having schizophrenia.
 
-Both datasets have been converted to long form for analyses. The data wrangling code can be explored here.
+Both datasets have been converted to long form for analyses. 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
+## RATS dataframe
 
-```
+Here is the original RATS dataframe and same data wrangled to long form with class changes. Variables ID and Group have been changed to factor type.
+As seen in tables, structure of dataframes are quite different, although they include the same information. A new variable "week" has been added to long form dataframe, RATSL. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
@@ -25,51 +26,119 @@ library(lme4)
 
 # read the RATS data
 RATS <- read.table("https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/rats.txt", header = TRUE, sep = '\t')
+
+# Glimpse the data
+glimpse(RATS)
+
 # Factor variables ID and Group
 RATS$ID <- as.factor(RATS$ID)
 RATS$Group <-as.factor(RATS$Group)
-# Glimpse the data
-glimpse(RATS)
+
 # Convert data to long form
 RATSL <- RATS %>% gather(key = WD, value = Weight, -ID, -Group)
 RATSL <- RATSL %>% mutate(Time = as.integer(substr(RATSL$WD, 3, 4)))  
 # Glimpse the data
 glimpse(RATSL)
 
+```
+### Plot of the RATSL data
+
+Here each individual rat has separate curves and three groups have marked with different line types.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lme4)
+
+
 # Plot the RATSL data
 ggplot(RATSL, aes(x = Time, y = Weight, group = ID)) +
   geom_line() + aes(linetype = Group) + scale_x_continuous(name = "Time (days)", breaks = seq(0, 60, 10)) + theme(legend.position = "top")
-  
+
+```
+
+#### Normal linear regression model (not for repeated measures)
+
+This is a normal linear model analysis without any interactions or random variables.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 # create a regression model RATS_reg
 RATS_reg <- lm(RATSL$Weight ~ RATSL$Time + RATSL$Group, data = RATSL)
 
 # print out a summary of the model
 summary(RATS_reg)
+```
 
+#### Random intercept model
+
+Here a random variable intercept (1 | ID) has been added and linear mixed model analysis (lmer function) has been executed.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 # Create a random intercept model
 RATS_ref <- lmer(Weight ~ Time + Group + (1 | ID), data = RATSL, REML = FALSE)
 
 # Print the summary of the model
 
 summary(RATS_ref)
+```
 
+#### Random intercept and random slope model
+
+Here is another model with random intercept and random slope model (Time | ID).
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 # create a random intercept and random slope model
 RATS_ref1 <- lmer(Weight ~ Time + Group + (Time | ID), data = RATSL, REML = FALSE)
 
 # print a summary of the model
 summary(RATS_ref1)
+```
 
+#### ANOVA of "Random intercept and random slope model" and "Random intercept model"
+
+Here we can see results of ANOVA for two aforementioned models.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 # perform an ANOVA test on the two models
 anova(RATS_ref1, RATS_ref)
+```
+
+#### Random intercept and random slope model with the interaction
+
+And here is another random variable (Time | Group) added.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
 # create a random intercept and random slope model with the interaction
-RATS_ref2 <- RATS_ref1 <- lmer(Weight ~ Time + Group + (Time | ID) + (Time | Group), data = RATSL, REML = FALSE)
+
+RATS_ref2 <- lmer(Weight ~ Time + Group + (Time | ID) + (Time | Group), data = RATSL, REML = FALSE)
 
 # print a summary of the model
 summary(RATS_ref2)
 
+```
+
+#### ANOVA of "Random intercept and random slope model with interaction" and "Random intercept and random slope model"
+
+Here again ANOVA for two latest models.
+
+Chi squared is 4.3719 with 3 df's and p = 0.22. That is, differences between groups are not statistically significant. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
+
 # perform an ANOVA test on the two models
 anova(RATS_ref2, RATS_ref1)
+
+```
+
+#### Plot of RATSL with the observed Weight values
+
+Comparison of observed and fitted weight values. 
+
+Observed values
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
 # draw the plot of RATSL with the observed Weight values
 ggplot(RATSL, aes(x = Time, y = Weight, group = ID)) +
@@ -77,6 +146,13 @@ ggplot(RATSL, aes(x = Time, y = Weight, group = ID)) +
   scale_x_continuous(name = "Time (days)", breaks = seq(0, 60, 20)) +
   scale_y_continuous(name = "Observed weight (grams)") +
   theme(legend.position = "top")
+```
+
+#### Plot of RATSL with the Fitted values of weight
+
+Fitted values
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
 # Create a vector of the fitted values
 Fitted <- fitted(RATS_ref2)
@@ -93,6 +169,11 @@ ggplot(RATSL, aes(x = Time, y = Fitted, group = ID)) +
 
 ```
 
+## BPRS dataframe
+
+As well as in RATS dataframe same data wrangling to long form with class changes has been made. Variables "treatment" and "subject" have been changed to factor type.
+As seen in tables, structure of dataframes are quite different, although they include the same information. Also here, a new integer variable "week" has been added to long form dataframe, BPRSL. 
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
 # Access the packages dplyr and tidyr
@@ -102,12 +183,15 @@ library(ggplot2)
 
 # Read the BPRS data
 BPRS <- read.table("https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/BPRS.txt", sep  =" ", header = T)
+
+glimpse(BPRS)
+
 # Look at the (column) names of BPRS
-names(BPRS)
+# names(BPRS)
 # Look at the structure of BPRS
-str(BPRS)
+# str(BPRS)
 # Print out summaries of the variables
-summary(BPRS)
+# summary(BPRS)
 # Factor treatment & subject
 BPRS$treatment <- factor(BPRS$treatment)
 BPRS$subject <- factor(BPRS$subject)
@@ -125,7 +209,15 @@ ggplot(BPRSL, aes(x = week, y = bprs, linetype = subject)) +
   facet_grid(. ~ treatment, labeller = label_both) +
   theme(legend.position = "none") + 
   scale_y_continuous(limits = c(min(BPRSL$bprs), max(BPRSL$bprs)))
-  
+
+```
+
+#### Standardization of the variable "bprs"
+
+Here, variable "bprs" has been standardized and the new variable "stdbprs" has been created and added to BPRSL dataframe.
+Men who have higher BPRS values at the beginning seem to have higher values throughout the study. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 # Standardise the variable bprs
 BPRSL <- BPRSL %>%
   group_by(week) %>%
@@ -141,7 +233,13 @@ ggplot(BPRSL, aes(x = week, y = stdbprs, linetype = subject)) +
   scale_linetype_manual(values = rep(1:10, times=4)) +
   facet_grid(. ~ treatment, labeller = label_both) +
   scale_y_continuous(name = "standardized bprs")
+```
 
+#### Means and standard errors
+
+Means (over all subjects) and standard errors have been calculated. In the figure below differences between treatments can be seen. Due to confidental intervals are overlapping, probability to statistically significant difference is weak.
+  
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 # Number of weeks, baseline (week 0) included
 n <- BPRSL$week %>% unique() %>% length()
 
@@ -163,7 +261,13 @@ ggplot(BPRSS, aes(x = week, y = mean, linetype = treatment, shape = treatment)) 
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se, linetype="1"), width=0.3) +
   theme(legend.position = c(0.8,0.8)) +
   scale_y_continuous(name = "mean(bprs) +/- se(bprs)")
+```
 
+#### Boxplot of the mean versus treatment
+
+Here is boxplot of both treatment groups.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 # Create a summary data by treatment and subject with mean as the summary variable (ignoring baseline week 0).
 BPRSL8S <- BPRSL %>%
   filter(week > 0) %>%
@@ -179,10 +283,16 @@ ggplot(BPRSL8S, aes(x = treatment, y = mean)) +
   geom_boxplot() +
   stat_summary(fun.y = "mean", geom = "point", shape=23, size=4, fill = "white") +
   scale_y_continuous(name = "mean(bprs), weeks 1-8")
+```
 
+#### Outlier
+
+Here we can see in the boxplot above an outlier, which may be an error. It also moves mean of the treatment 2 upwards. It can be removed by filtering out bprs values above 60. Below is the new boxplot with outlier removed. Mean (white square) is now closer to median (black horizontal line).
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 # Create a new data by filtering the outlier and adjust the ggplot code the draw the plot again with the new data
 BPRSL8S1 <- BPRSL %>%
-  filter(week > 0, bprs < 45) %>%
+  filter(week > 0, bprs < 60) %>%
   group_by(treatment, subject) %>%
   summarise( mean=mean(bprs) ) %>%
   ungroup()
@@ -191,63 +301,47 @@ ggplot(BPRSL8S1, aes(x = treatment, y = mean)) +
   stat_summary(fun.y = "mean", geom = "point", shape=23, size=4, fill = "white") +
   scale_y_continuous(name = "mean(bprs), weeks 1-8")
   
+```
+
+#### T-test
+
+For testing difference between means of treatments, common two sample t-test is suitable. According to it, p value 0.75 is far from significance. That is, treatments do not have statistically significant difference.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 # Perform a two-sample t-test
 t.test(mean ~ treatment, data = BPRSL8S1, var.equal = TRUE)
+```
 
+#### Adding baseline 
+
+Here we add the baseline from the original data as a new variable to the summary data.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 # Add the baseline from the original data as a new variable to the summary data
 BPRSL8S2 <- BPRSL8S %>%
   mutate(baseline = BPRS$week0)
+glimpse(BPRSL8S2)
+```
 
+#### Linear model with baseline and treatment
+
+Here we run lm -function "mean" as target and "baseline" and "treatment" as explanatory variables.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 # Fit the linear model with the mean as the response 
 fit <- lm(mean ~ baseline + treatment, data = BPRSL8S2)
+fit
 
+```
+
+#### Anova of linear model
+
+Even with baseline corrected, treatments have not significant difference (p = 0.81).
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 # Compute the analysis of variance table for the fitted model with anova()
 
 anova(fit)
-
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
 ```
 
 
@@ -257,13 +351,9 @@ anova(fit)
 
 
 
-During the Analysis exercise you will explore both data sets graphically and perform some initial analyses that require various data conversions. Finally you will create and test a few advanced statistical models and, of course, interpret the results in all phases of the analysis.
-The Analysis exercise focuses on exploring your data and performing and interpreting simple straightforward methods (based on summary measures of data) and more advanced methods (called linear mixed effects models). For completing the Analysis exercises, include all the codes, your interpretations and explanations in the R Markdown file chapter6.Rmd. 
 
-Implement the analyses of Chapter 8 of MABS using the RATS data. (0-7 points)
 
-Implement the analyses of Chapter 9 of MABS using the BPRS data. (0-8 points)
- 
+
 
 
 
