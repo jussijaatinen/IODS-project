@@ -1,10 +1,16 @@
 ---
-title: "Analysis of "
+title: "Analysis of longitudinal and repeated measures data"
 author: "Jussi Jaatinen"
 output: html_document
 ---
 
-# Analysis of 
+# Analysis of longitudinal and repeated measures data
+
+If the same person makes several observations in same experiment or the weight of the same animal is measured several times during the longer time or in different conditions, those measurements are hardly independent. This must be also taken into account in analysis models of such kind of data. 
+
+Two such kind of datasets are wrangled and analyzed in this excercise. First set, RATS, includes information about different nutritions and their influence to the weight of rats during 9 weeks period. In the second set, BPRS, 40 male subjects were randomly assigned to two groups and each subject was rated on the brief psychiatric rating scale (BPRS) measured before treatment and then at weekly intervals for eight weeks.The scale is used to evaluate patients suspected of having schizophrenia.
+
+Both datasets have been converted to long form for analyses. The data wrangling code can be explored here.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
@@ -12,57 +18,87 @@ output: html_document
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lme4)
+
+# read the RATS data
+RATS <- read.table("https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/rats.txt", header = TRUE, sep = '\t')
+# Factor variables ID and Group
+RATS$ID <- as.factor(RATS$ID)
+RATS$Group <-as.factor(RATS$Group)
+# Glimpse the data
+glimpse(RATS)
+# Convert data to long form
+RATSL <- RATS %>% gather(key = WD, value = Weight, -ID, -Group)
+RATSL <- RATSL %>% mutate(Time = as.integer(substr(RATSL$WD, 3, 4)))  
+# Glimpse the data
+glimpse(RATSL)
+
+# Plot the RATSL data
+ggplot(RATSL, aes(x = Time, y = Weight, group = ID)) +
+  geom_line() + aes(linetype = Group) + scale_x_continuous(name = "Time (days)", breaks = seq(0, 60, 10)) + theme(legend.position = "top")
+  
+# create a regression model RATS_reg
+RATS_reg <- lm(RATSL$Weight ~ RATSL$Time + RATSL$Group, data = RATSL)
+
+# print out a summary of the model
+summary(RATS_reg)
+
+# Create a random intercept model
+RATS_ref <- lmer(Weight ~ Time + Group + (1 | ID), data = RATSL, REML = FALSE)
+
+# Print the summary of the model
+
+summary(RATS_ref)
+
+# create a random intercept and random slope model
+RATS_ref1 <- lmer(Weight ~ Time + Group + (Time | ID), data = RATSL, REML = FALSE)
+
+# print a summary of the model
+summary(RATS_ref1)
+
+# perform an ANOVA test on the two models
+anova(RATS_ref1, RATS_ref)
+
+# create a random intercept and random slope model with the interaction
+RATS_ref2 <- RATS_ref1 <- lmer(Weight ~ Time + Group + (Time | ID) + (Time | Group), data = RATSL, REML = FALSE)
+
+# print a summary of the model
+summary(RATS_ref2)
+
+# perform an ANOVA test on the two models
+anova(RATS_ref2, RATS_ref1)
+
+# draw the plot of RATSL with the observed Weight values
+ggplot(RATSL, aes(x = Time, y = Weight, group = ID)) +
+  geom_line(aes(linetype = Group)) +
+  scale_x_continuous(name = "Time (days)", breaks = seq(0, 60, 20)) +
+  scale_y_continuous(name = "Observed weight (grams)") +
+  theme(legend.position = "top")
+
+# Create a vector of the fitted values
+Fitted <- fitted(RATS_ref2)
+
+# Create a new column fitted to RATSL
+RATSL <- mutate(RATSL, Fitted = Fitted)
+
+# draw the plot of RATSL with the Fitted values of weight
+ggplot(RATSL, aes(x = Time, y = Fitted, group = ID)) +
+  geom_line(aes(linetype = Group)) +
+  scale_x_continuous(name = "Time (days)", breaks = seq(0, 60, 20)) +
+  scale_y_continuous(name = "Fitted weight (grams)") +
+  theme(legend.position = "top")
+
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
-
-```
-
-
-
+# Access the packages dplyr and tidyr
+library(dplyr)
+library(tidyr)
+library(ggplot2)
 
 # Read the BPRS data
 BPRS <- read.table("https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/BPRS.txt", sep  =" ", header = T)
@@ -72,23 +108,15 @@ names(BPRS)
 str(BPRS)
 # Print out summaries of the variables
 summary(BPRS)
-
-# Access the packages dplyr and tidyr
-library(dplyr)
-library(tidyr)
-
 # Factor treatment & subject
 BPRS$treatment <- factor(BPRS$treatment)
 BPRS$subject <- factor(BPRS$subject)
 # Convert to long form
 BPRSL <-  BPRS %>% gather(key = weeks, value = bprs, -treatment, -subject)
 # Extract the week number
-BPRSL <-  BPRSL %>% mutate(week = as.integer(substr("weeks", 5, 5)))
+BPRSL <-  BPRSL %>% mutate(week = as.integer(substr(BPRSL$weeks, 5, 5)))
 # Take a glimpse at the BPRSL data
 glimpse(BPRSL)
-
-#Access the package ggplot2
-library(ggplot2)
 
 # Draw the plot
 ggplot(BPRSL, aes(x = week, y = bprs, linetype = subject)) +
@@ -177,116 +205,65 @@ fit <- lm(mean ~ baseline + treatment, data = BPRSL8S2)
 
 anova(fit)
 
+```
 
-# read the RATS data
-RATS <- read.table("https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/rats.txt", header = TRUE, sep = '\t')
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
-# Factor variables ID and Group
-as.factor(RATS$ID)
-as.factor(RATS$Group)
+```
 
-# Glimpse the data
-glimpse(RATS)
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
-# Convert data to long form
-RATSL <- RATS %>%
-  gather(key = WD, value = Weight, -ID, -Group) %>%
-  mutate(Time = as.integer(substr("WD", 3, 4))) 
+```
 
-# Glimpse the data
-glimpse(RATSL)
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
-# Plot the RATSL data
-ggplot(RATSL, aes(x = Time, y = Weight, group = ID)) +
-  geom_line() + aes(linetype = Group) + scale_x_continuous(name = "Time (days)", breaks = seq(0, 60, 10)) + theme(legend.position = "top")
-  
-# create a regression model RATS_reg
-RATS_reg <- lm(RATSL$Weight ~ RATSL$Time + RATSL$Group, data = RATSL)
+```
 
-# print out a summary of the model
-summary(RATS_reg)
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
-# access library lme4
-library(lme4)
+```
 
-# Create a random intercept model
-RATS_ref <- lmer(Weight ~ Time + Group + (1 | ID), data = RATSL, REML = FALSE)
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
-# Print the summary of the model
+```
 
-summary(RATS_ref)
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
-# create a random intercept and random slope model
-RATS_ref1 <- lmer(Weight ~ Time + Group + (Time | ID), data = RATSL, REML = FALSE)
+```
 
-# print a summary of the model
-summary(RATS_ref1)
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
-# perform an ANOVA test on the two models
-anova(RATS_ref1, RATS_ref)
+```
 
-# create a random intercept and random slope model with the interaction
-RATS_ref2 <- RATS_ref1 <- lmer(Weight ~ Time + Group + (Time | ID) + (Time | Group), data = RATSL, REML = FALSE)
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
-# print a summary of the model
-summary(RATS_ref2)
+```
 
-# perform an ANOVA test on the two models
-anova(RATS_ref2, RATS_ref1)
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
-# draw the plot of RATSL with the observed Weight values
-ggplot(RATSL, aes(x = Time, y = Weight, group = ID)) +
-  geom_line(aes(linetype = Group)) +
-  scale_x_continuous(name = "Time (days)", breaks = seq(0, 60, 20)) +
-  scale_y_continuous(name = "Observed weight (grams)") +
-  theme(legend.position = "top")
+```
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
-# Create a vector of the fitted values
-Fitted <- fitted(RATS_ref2)
+```
 
-# Create a new column fitted to RATSL
-RATSL <- mutate(RATSL, Fitted = Fitted)
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
-# draw the plot of RATSL with the Fitted values of weight
-ggplot(RATSL, aes(x = Time, y = Fitted, group = ID)) +
-  geom_line(aes(linetype = Group)) +
-  scale_x_continuous(name = "Time (days)", breaks = seq(0, 60, 20)) +
-  scale_y_continuous(name = "Fitted weight (grams)") +
-  theme(legend.position = "top")
+```
 
-During the Data wrangling exercise you will prepare two data sets for the Analysis exercise, learning an important R skill that is needed always when working with longitudinal or repeated measures data, that is, converting the data between the wide form and the long form. Typically, these types of data appear in the wide form, but most of the analyses require the data to be in the long form. 
+
+
+
+
+
+
 
 During the Analysis exercise you will explore both data sets graphically and perform some initial analyses that require various data conversions. Finally you will create and test a few advanced statistical models and, of course, interpret the results in all phases of the analysis.
-
-
 The Analysis exercise focuses on exploring your data and performing and interpreting simple straightforward methods (based on summary measures of data) and more advanced methods (called linear mixed effects models). For completing the Analysis exercises, include all the codes, your interpretations and explanations in the R Markdown file chapter6.Rmd. 
 
-Data
-You will prepare and analyze two data sets, BPRS and RATS. The stories behind these data are found in the MABS4IODS text (BPRS: in Chapter 8 and RATS: in Chapter 9 of MABS).
-
-Data wrangling (max 5 points)
-Create a new R script meet_and_repeat.R and prepare the two data sets for the analyses as follows:
-
-1. Load the data sets (BPRS and RATS) into R using as the source the GitHub repository of MABS, where they are given in the wide form:
-
-https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/BPRS.txt
-https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/rats.txt
-Also, take a look at the data sets: check their variable names, view the data contents and structures, and create some brief summaries of the variables, so that you understand the point of the wide form data. (1 point)
-
-2. Convert the categorical variables of both data sets to factors. (1 point)
-
-3. Convert the data sets to long form. Add a week variable to BPRS and a Time variable to RATS. (1 point)
-
-4. Now, take a serious look at the new data sets and compare them with their wide form versions: check the variable names, view the data contents and structures, and create some brief summaries of the variables. Make sure that you understand the point of the long form data and the crucial difference between the wide and the long forms before proceeding the to Analysis exercise. (2 points)
-
-Analysis (max 15 points)
-After all these weeks of hard work, you should be able to go (almost) on your own. Please use the corresponding DataCamp chapter (built by assistant Petteri) and the MABS4IODS materials (see links above): It should not be too difficult. Instead, it should be interesting and fun! (Lots of NEW RESULTS that do NOT APPEAR in MABS!)
-
-FYI: After a few extra hectic days of not getting this done I suddenly got the idea on Sunday 2 December at 1 pm, and could not resist trying some of it myself immediately. I can tell you it was fun! But I will leave it all to you now! As some of you might know, this exercise and chapter replaces the former "Final Assignment" on this course, and in a way it has a bit similar flavor of a nice challenge. I wish you many fascinating moments with this fresh RStudio exercise and the very nice DataCamp exercises - grazie mille Petteri! - Kimmo
-
 Implement the analyses of Chapter 8 of MABS using the RATS data. (0-7 points)
+
 Implement the analyses of Chapter 9 of MABS using the BPRS data. (0-8 points)
-Please note the SWAP of the data sets! :) 
+ 
 
 
 
