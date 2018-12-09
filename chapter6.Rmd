@@ -97,7 +97,7 @@ summary(RATS_ref1)
 
 #### ANOVA of "Random  slope model" and "Random intercept model"
 
-Here we can see results of ANOVA for two aforementioned models. Here we can see that due to Chi^2 test, there is significant difference between these two models.
+Here we can see results of ANOVA for two aforementioned models. Here we can see that due to Chi^2^ test, there is a significant difference between these two models.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 # perform an ANOVA test on the two models
@@ -121,7 +121,7 @@ summary(RATS_ref2)
 
 #### ANOVA of "Random slope model with interaction" and "Random slope model"
 
-Here again ANOVA for two latest models.  Due to Chi^2 test, there is significant difference between these two models.
+Here again ANOVA for two latest models.  Due to Chi^2^ test, there is no significant difference between these two models.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
