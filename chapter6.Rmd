@@ -121,7 +121,7 @@ summary(RATS_ref2)
 
 #### ANOVA of "Random slope model with interaction" and "Random slope model"
 
-Here again ANOVA for two latest models.  Due to Chi^2^ test, there is no significant difference between these two models.
+Here again ANOVA for two latest models.  Due to Chi^2 test, there is no significant difference between these two models.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, comment=''}
 
@@ -219,7 +219,7 @@ Men who have higher BPRS values at the beginning seem to have higher values thro
 # Standardise the variable bprs
 BPRSL <- BPRSL %>%
   group_by(week) %>%
-  mutate(stdbprs = scale(bprs)) %>%
+  mutate(stdbprs = (bprs - mean(bprs)) / sd(bprs)) %>%
   ungroup()
 
 # Glimpse the data
